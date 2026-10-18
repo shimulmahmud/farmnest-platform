@@ -1,0 +1,159 @@
+# One command starts everything:   docker compose up --build
+#
+#   Storefront  http://localhost:5174
+#   Admin       http://localhost:5173      (admin@ecommerce.com / Password123!)
+#   API         http://localhost:8080
+#   Mailpit     http://localhost:8025      (catches emails, e.g. the sign-up verification code)
+#
+# Optional settings go in a file named .env next to this one (see .env.example).
+name: farmnest
+
+services:
+  # ------------------------------------------------------------------
+  # Infrastructure
+  # ------------------------------------------------------------------
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ecommerce
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  nats:
+    image: nats:2.10-alpine3.19
+    restart: unless-stopped
+    command: >-
+      --js
+      --store_dir /data
+      --cluster_name ecommerce-cluster
+      -m 8222
+    volumes:
+      - nats_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8222/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+
+  mailpit:
+    image: axllent/mailpit:v1.27.8
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # web inbox
+      - "1025:1025"   # SMTP
+
+  # ------------------------------------------------------------------
+  # Demo data: loads only into an EMPTY database, then exits.
+  # Reset on purpose:  docker compose run --rm -e FORCE_SEED=1 seed
+  # ------------------------------------------------------------------
+  seed:
+    image: mongo:7
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./backend/scripts/seed.js:/seed.js:ro
+    entrypoint: ["mongosh", "mongodb://mongodb:27017/ecommerce", "--file", "/seed.js"]
+
+  # ------------------------------------------------------------------
+  # Backend
+  # ------------------------------------------------------------------
+  api:
+    build:
+      context: ./backend
+      target: api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      # Wallets customers pay to at checkout (a wallet with no number is not offered).
+      PAYMENT_BKASH_NUMBER: ${PAYMENT_BKASH_NUMBER:-01700000000}
+      PAYMENT_NAGAD_NUMBER: ${PAYMENT_NAGAD_NUMBER:-}
+      PAYMENT_ROCKET_NUMBER: ${PAYMENT_ROCKET_NUMBER:-}
+      # Emails: shop name and the addresses their buttons open
+      APP_NAME: ${APP_NAME:-FarmNest}
+      APP_URL: ${APP_URL:-http://localhost:5174}
+      ADMIN_URL: ${ADMIN_URL:-http://localhost:5173}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+      BRAND_LOGO_URL: ${BRAND_LOGO_URL:-}
+      BRAND_COLOR: ${BRAND_COLOR:-#1f5c3a}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    build:
+      context: ./backend
+      target: worker
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      APP_NAME: ${APP_NAME:-FarmNest}
+      APP_URL: ${APP_URL:-http://localhost:5174}
+      ADMIN_URL: ${ADMIN_URL:-http://localhost:5173}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+      BRAND_LOGO_URL: ${BRAND_LOGO_URL:-}
+      BRAND_COLOR: ${BRAND_COLOR:-#1f5c3a}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  # ------------------------------------------------------------------
+  # Frontends (static sites served by nginx; /api is forwarded to the backend)
+  # ------------------------------------------------------------------
+  admin:
+    build:
+      context: ./frontend/admin
+      args:
+        VITE_APP_NAME: ${APP_NAME:-FarmNest}
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-5173}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ./frontend/client
+      args:
+        VITE_SITE_URL: ${SITE_URL:-}
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT:-5174}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  mongodb_data:
+  nats_data:

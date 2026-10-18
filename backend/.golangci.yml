@@ -1,0 +1,102 @@
+# GolangCI-Lint configuration
+# https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+  # Skip generated files and testcontainers setup
+  skip-dirs:
+    - bin
+    - results
+  skip-files:
+    - "_test\.go$"
+
+linters:
+  enable:
+    # Default linters
+    - errcheck        # unchecked errors
+    - gosimple        # simplify code
+    - govet           # go vet checks
+    - ineffassign     # ineffectual assignments
+    - staticcheck     # advanced static analysis
+    - unused          # unused code
+    # Additional linters
+    - gofmt           # check formatting
+    - goimports       # check import ordering
+    - misspell        # spelling mistakes
+    - gocritic        # opinionated linter
+    - gosec           # security checks
+    - bodyclose       # check HTTP body close
+    - noctx           # HTTP requests without context
+    - nilerr          # check for nil err returns
+    - unparam         # unused function parameters
+    - prealloc        # preallocate slices
+    - wastedassign    # wasted assignments
+    - errname         # error naming convention
+    - exhaustive      # check switch exhaustiveness
+    - depguard        # block unwanted imports
+    - nakedret        # naked returns in non-short functions
+    - gocyclo         # cyclomatic complexity
+    - funlen          # function length
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # noisy for this codebase
+
+  gosec:
+    excludes:
+      - G104  # audit: unchecked errors (covered by errcheck)
+    config:
+      global:
+        audit: true
+
+  gocyclo:
+    min-complexity: 15
+
+  funlen:
+    lines: 80
+    statements: 50
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+    disabled-checks:
+      - hugeParam     # false positives with Fiber context
+      - rangeValCopy  # noisy
+
+  errname:
+    # Allow 'err' and 'Err' prefixes
+    pattern: ^(Err|err)[A-Za-z0-9]*$
+
+  depguard:
+    rules:
+      main:
+        deny:
+          - pkg: "io/ioutil"
+            desc: "deprecated: use io and os packages instead"
+          - pkg: "github.com/pkg/errors"
+            desc: "use fmt.Errorf with %w for error wrapping"
+
+issues:
+  # Show all issues
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  # Exclude generated files
+  exclude-dirs:
+    - bin
+    - results
+  # Default exclusions
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - gocyclo
+        - gosec
+        - errcheck
+    - path: cmd/
+      linters:
+        - funlen  # main functions tend to be long for wiring

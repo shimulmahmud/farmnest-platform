@@ -1,0 +1,19 @@
+# Service: ecommerce-worker (headless)
+# Workers are consumers with no server port. A headless Service is defined
+# so that DNS-based service discovery works if needed (e.g., for admin tools
+# that need to list worker pods).
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-worker
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce-worker
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: ecommerce
+spec:
+  clusterIP: None   # headless — no load balancing, DNS returns pod IPs
+  selector:
+    app.kubernetes.io/name: ecommerce-worker
+  # No ports — workers are pure consumers with no listening ports.

@@ -1,0 +1,809 @@
+{
+    "success": true,
+    "data": [
+        {
+            "id": "58d5d5e0-2a65-4321-a140-a6691f5de86c",
+            "name": "Wireless Bluetooth Headphones",
+            "slug": "wireless-bluetooth-headphones",
+            "description": "Premium noise-cancelling wireless headphones with 30-hour battery life.",
+            "short_description": "Premium noise-cancelling headphones",
+            "brand": "AudioTech",
+            "category_id": "d0000000-0000-4000-d000-000000000001",
+            "tags": [
+                "electronics",
+                "audio",
+                "wireless"
+            ],
+            "images": [
+                {
+                    "url": "https://example.com/headphones.jpg",
+                    "alt": "Wireless Headphones",
+                    "width": 0,
+                    "height": 0,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "f0dc438c-1ea5-41d8-8d91-2253073d4254",
+                    "sku": "AT-WH-BLK",
+                    "price": 149.99,
+                    "compare_at_price": 199.99,
+                    "cost_price": 75,
+                    "stock": 100,
+                    "weight": 0.25,
+                    "attributes": {
+                        "color": "Black"
+                    },
+                    "images": [
+                        {
+                            "url": "https://example.com/headphones-blk.jpg",
+                            "alt": "Black",
+                            "width": 0,
+                            "height": 0,
+                            "sort_order": 1
+                        }
+                    ],
+                    "status": "ACTIVE",
+                    "position": 0,
+                    "created_at": "2026-10-06T08:42:06Z",
+                    "updated_at": "2026-10-06T08:42:06Z"
+                },
+                {
+                    "id": "649b2922-adcf-4789-839c-90034947aa72",
+                    "sku": "AT-WH-WHT",
+                    "price": 149.99,
+                    "compare_at_price": 199.99,
+                    "cost_price": 75,
+                    "stock": 50,
+                    "weight": 0.25,
+                    "attributes": {
+                        "color": "White"
+                    },
+                    "images": [
+                        {
+                            "url": "https://example.com/headphones-wht.jpg",
+                            "alt": "White",
+                            "width": 0,
+                            "height": 0,
+                            "sort_order": 1
+                        }
+                    ],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-10-06T08:42:06Z",
+                    "updated_at": "2026-10-06T08:42:06Z"
+                }
+            ],
+            "status": "DRAFT",
+            "seo": {
+                "title": "Wireless Bluetooth Headphones",
+                "description": "Buy premium noise-cancelling headphones",
+                "keywords": "headphones, wireless, bluetooth, noise-cancelling"
+            },
+            "sort_order": 1,
+            "lowest_price": 149.99,
+            "has_stock": true,
+            "created_at": "2026-10-06T08:42:06Z",
+            "updated_at": "2026-10-06T08:42:06Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000001",
+            "name": "ProBook Ultra 15",
+            "slug": "probook-ultra-15",
+            "description": "A high-performance laptop with a stunning 15.6-inch display, 32GB RAM, and all-day battery life. Perfect for professionals and creators who demand power and portability. Features the latest-generation processor, a backlit keyboard, and a precision trackpad.",
+            "short_description": "15.6\" laptop, 32GB RAM, 512GB SSD",
+            "brand": "TechPro",
+            "category_id": "d0000000-0000-4000-d000-000000000001",
+            "tags": [
+                "laptop",
+                "computer",
+                "professional",
+                "portable"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/laptop-1.jpg",
+                    "alt": "ProBook Ultra 15 front view",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                },
+                {
+                    "url": "/images/products/laptop-2.jpg",
+                    "alt": "ProBook Ultra 15 side view",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 2
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-laptop-silver",
+                    "sku": "PB-ULTRA-15-SLV",
+                    "price": 1299.99,
+                    "compare_at_price": 1499.99,
+                    "cost_price": 850,
+                    "stock": 25,
+                    "weight": 1.8,
+                    "attributes": {
+                        "color": "Silver",
+                        "storage": "512GB"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-06T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-laptop-gray",
+                    "sku": "PB-ULTRA-15-GRY",
+                    "price": 1349.99,
+                    "compare_at_price": 1549.99,
+                    "cost_price": 900,
+                    "stock": 15,
+                    "weight": 1.8,
+                    "attributes": {
+                        "color": "Space Gray",
+                        "storage": "512GB"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-06T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-laptop-1tb",
+                    "sku": "PB-ULTRA-15-1TB",
+                    "price": 1549.99,
+                    "compare_at_price": 1749.99,
+                    "cost_price": 1050,
+                    "stock": 10,
+                    "weight": 1.8,
+                    "attributes": {
+                        "color": "Silver",
+                        "storage": "1TB"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 3,
+                    "created_at": "2026-09-11T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "ProBook Ultra 15 - TechPro",
+                "description": "High-performance 15.6-inch laptop for professionals",
+                "keywords": "laptop, probook, techpro, ultrabook"
+            },
+            "sort_order": 1,
+            "lowest_price": 1299.99,
+            "has_stock": true,
+            "created_at": "2026-09-06T08:24:22Z",
+            "updated_at": "2026-10-04T08:24:22Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000002",
+            "name": "Updated Product Name",
+            "slug": "galaxy-nova-x",
+            "description": "The Galaxy Nova X redefines what a smartphone can do. With its 6.7-inch AMOLED display, 108MP camera system, and 5G connectivity, it captures stunning photos and streams content effortlessly. The 5000mAh battery keeps you going all day.",
+            "short_description": "6.7\" AMOLED, 108MP, 256GB, 5G",
+            "brand": "NovaTech",
+            "category_id": "d0000000-0000-4000-d000-000000000001",
+            "tags": [
+                "phone",
+                "smartphone",
+                "5g",
+                "camera"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/phone-1.jpg",
+                    "alt": "Galaxy Nova X front",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-phone-black",
+                    "sku": "GN-NOVA-X-BLK",
+                    "price": 899.99,
+                    "compare_at_price": 999.99,
+                    "cost_price": 580,
+                    "stock": 50,
+                    "weight": 0.2,
+                    "attributes": {
+                        "color": "Midnight Black",
+                        "storage": "256GB"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-16T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                },
+                {
+                    "id": "v-phone-white",
+                    "sku": "GN-NOVA-X-WHT",
+                    "price": 899.99,
+                    "compare_at_price": 999.99,
+                    "cost_price": 580,
+                    "stock": 40,
+                    "weight": 0.2,
+                    "attributes": {
+                        "color": "Pearl White",
+                        "storage": "256GB"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-16T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                },
+                {
+                    "id": "v-phone-512",
+                    "sku": "GN-NOVA-X-512",
+                    "price": 1049.99,
+                    "compare_at_price": 1149.99,
+                    "cost_price": 700,
+                    "stock": 20,
+                    "weight": 0.2,
+                    "attributes": {
+                        "color": "Midnight Black",
+                        "storage": "512GB"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 3,
+                    "created_at": "2026-09-16T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "Galaxy Nova X - NovaTech",
+                "description": "Flagship smartphone with 108MP camera and 5G",
+                "keywords": "phone, galaxy, novatech, 5g, smartphone"
+            },
+            "sort_order": 2,
+            "lowest_price": 899.99,
+            "has_stock": true,
+            "created_at": "2026-09-16T08:24:22Z",
+            "updated_at": "2026-10-06T08:45:50Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000003",
+            "name": "SoundWave Pro ANC",
+            "slug": "soundwave-pro-anc",
+            "description": "Immerse yourself in pure sound with the SoundWave Pro ANC headphones. Active noise cancellation blocks out the world, while 40mm custom drivers deliver rich, detailed audio. With 30-hour battery life and premium memory foam ear cushions, these headphones are built for all-day comfort.",
+            "short_description": "Over-ear ANC headphones, 30hr battery",
+            "brand": "SoundWave",
+            "category_id": "d0000000-0000-4000-d000-000000000001",
+            "tags": [
+                "headphones",
+                "audio",
+                "wireless",
+                "anc",
+                "bluetooth"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/headphones-1.jpg",
+                    "alt": "SoundWave Pro ANC",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-hp-black",
+                    "sku": "SW-PRO-ANC-BLK",
+                    "price": 249.99,
+                    "compare_at_price": 299.99,
+                    "cost_price": 120,
+                    "stock": 100,
+                    "weight": 0.25,
+                    "attributes": {
+                        "color": "Matte Black"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-21T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                },
+                {
+                    "id": "v-hp-white",
+                    "sku": "SW-PRO-ANC-WHT",
+                    "price": 249.99,
+                    "compare_at_price": 299.99,
+                    "cost_price": 120,
+                    "stock": 75,
+                    "weight": 0.25,
+                    "attributes": {
+                        "color": "Cream White"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-21T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "SoundWave Pro ANC Headphones",
+                "description": "Premium noise-cancelling headphones",
+                "keywords": "headphones, anc, noise cancelling, soundwave"
+            },
+            "sort_order": 3,
+            "lowest_price": 249.99,
+            "has_stock": true,
+            "created_at": "2026-09-21T08:24:22Z",
+            "updated_at": "2026-10-05T08:24:22Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000004",
+            "name": "Classic Cotton Crew Tee",
+            "slug": "classic-cotton-crew-tee",
+            "description": "Made from 100% organic cotton, this crew neck t-shirt offers a relaxed fit that is perfect for everyday wear. Pre-shrunk fabric holds its shape wash after wash. Available in a range of colors to suit any wardrobe.",
+            "short_description": "100% organic cotton, relaxed fit",
+            "brand": "BasicsCo",
+            "category_id": "d0000000-0000-4000-d000-000000000002",
+            "tags": [
+                "tshirt",
+                "cotton",
+                "basics",
+                "casual"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/tshirt-1.jpg",
+                    "alt": "Classic Cotton Tee",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-tee-s",
+                    "sku": "BC-CCT-S",
+                    "price": 29.99,
+                    "cost_price": 8.5,
+                    "stock": 200,
+                    "weight": 0.18,
+                    "attributes": {
+                        "color": "White",
+                        "size": "S"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-08-27T08:24:22Z",
+                    "updated_at": "2026-10-03T08:24:22Z"
+                },
+                {
+                    "id": "v-tee-m",
+                    "sku": "BC-CCT-M",
+                    "price": 29.99,
+                    "cost_price": 8.5,
+                    "stock": 300,
+                    "weight": 0.2,
+                    "attributes": {
+                        "color": "White",
+                        "size": "M"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-08-27T08:24:22Z",
+                    "updated_at": "2026-10-03T08:24:22Z"
+                },
+                {
+                    "id": "v-tee-l",
+                    "sku": "BC-CCT-L",
+                    "price": 29.99,
+                    "cost_price": 8.5,
+                    "stock": 250,
+                    "weight": 0.22,
+                    "attributes": {
+                        "color": "White",
+                        "size": "L"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 3,
+                    "created_at": "2026-08-27T08:24:22Z",
+                    "updated_at": "2026-10-03T08:24:22Z"
+                },
+                {
+                    "id": "v-tee-xl",
+                    "sku": "BC-CCT-XL",
+                    "price": 29.99,
+                    "cost_price": 8.5,
+                    "stock": 150,
+                    "weight": 0.25,
+                    "attributes": {
+                        "color": "White",
+                        "size": "XL"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 4,
+                    "created_at": "2026-08-27T08:24:22Z",
+                    "updated_at": "2026-10-03T08:24:22Z"
+                },
+                {
+                    "id": "v-tee-m-blk",
+                    "sku": "BC-CCT-M-BLK",
+                    "price": 29.99,
+                    "cost_price": 8.5,
+                    "stock": 180,
+                    "weight": 0.2,
+                    "attributes": {
+                        "color": "Black",
+                        "size": "M"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 5,
+                    "created_at": "2026-08-27T08:24:22Z",
+                    "updated_at": "2026-10-03T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "Classic Cotton Crew Tee",
+                "description": "Essential organic cotton t-shirt",
+                "keywords": "tshirt, cotton, basics, organic"
+            },
+            "sort_order": 4,
+            "lowest_price": 29.99,
+            "has_stock": true,
+            "created_at": "2026-08-27T08:24:22Z",
+            "updated_at": "2026-10-03T08:24:22Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000005",
+            "name": "Updated Product Name",
+            "slug": "slim-fit-stretch-denim",
+            "description": "These slim-fit jeans feature premium stretch denim that moves with you. With a modern tapered leg and classic five-pocket design, they are versatile enough for work or weekend. The indigo wash gives them a lived-in look from day one.",
+            "short_description": "Slim fit, stretch denim, indigo wash",
+            "brand": "DenimLab",
+            "category_id": "d0000000-0000-4000-d000-000000000002",
+            "tags": [
+                "jeans",
+                "denim",
+                "slim fit",
+                "casual",
+                "mens"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/jeans-1.jpg",
+                    "alt": "Slim Fit Denim Jeans",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-jeans-30",
+                    "sku": "DL-SFD-30",
+                    "price": 79.99,
+                    "compare_at_price": 99.99,
+                    "cost_price": 30,
+                    "stock": 80,
+                    "weight": 0.45,
+                    "attributes": {
+                        "color": "Indigo",
+                        "size": "30"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-01T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-jeans-32",
+                    "sku": "DL-SFD-32",
+                    "price": 79.99,
+                    "compare_at_price": 99.99,
+                    "cost_price": 30,
+                    "stock": 120,
+                    "weight": 0.48,
+                    "attributes": {
+                        "color": "Indigo",
+                        "size": "32"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-01T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-jeans-34",
+                    "sku": "DL-SFD-34",
+                    "price": 79.99,
+                    "compare_at_price": 99.99,
+                    "cost_price": 30,
+                    "stock": 90,
+                    "weight": 0.5,
+                    "attributes": {
+                        "color": "Indigo",
+                        "size": "34"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 3,
+                    "created_at": "2026-09-01T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-jeans-36",
+                    "sku": "DL-SFD-36",
+                    "price": 79.99,
+                    "compare_at_price": 99.99,
+                    "cost_price": 30,
+                    "stock": 60,
+                    "weight": 0.55,
+                    "attributes": {
+                        "color": "Indigo",
+                        "size": "36"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 4,
+                    "created_at": "2026-09-01T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "Slim Fit Stretch Denim - DenimLab",
+                "description": "Premium stretch denim jeans with modern fit",
+                "keywords": "jeans, denim, slim fit, mens"
+            },
+            "sort_order": 5,
+            "lowest_price": 79.99,
+            "has_stock": true,
+            "created_at": "2026-09-01T08:24:22Z",
+            "updated_at": "2026-10-06T08:43:11Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000006",
+            "name": "Chrono Titanium Smart Watch",
+            "slug": "chrono-titanium-smart-watch",
+            "description": "The Chrono Titanium combines luxury craftsmanship with smart technology. The grade-5 titanium case houses an always-on AMOLED display with health monitoring, GPS, and 7-day battery life. Water resistant to 100 meters with sapphire crystal glass.",
+            "short_description": "Titanium case, AMOLED, 7-day battery, GPS",
+            "brand": "Chrono",
+            "category_id": "d0000000-0000-4000-d000-000000000003",
+            "tags": [
+                "watch",
+                "smartwatch",
+                "titanium",
+                "gps",
+                "fitness"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/watch-1.jpg",
+                    "alt": "Chrono Titanium Smart Watch",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-watch-40",
+                    "sku": "CH-TIT-40",
+                    "price": 399.99,
+                    "compare_at_price": 449.99,
+                    "cost_price": 180,
+                    "stock": 35,
+                    "weight": 0.055,
+                    "attributes": {
+                        "band": "Leather",
+                        "case_size": "40mm"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-26T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                },
+                {
+                    "id": "v-watch-44",
+                    "sku": "CH-TIT-44",
+                    "price": 429.99,
+                    "compare_at_price": 479.99,
+                    "cost_price": 200,
+                    "stock": 25,
+                    "weight": 0.065,
+                    "attributes": {
+                        "band": "Titanium",
+                        "case_size": "44mm"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-26T08:24:22Z",
+                    "updated_at": "2026-10-05T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "Chrono Titanium Smart Watch",
+                "description": "Premium titanium smartwatch with AMOLED display",
+                "keywords": "watch, smartwatch, chrono, titanium, fitness"
+            },
+            "sort_order": 6,
+            "lowest_price": 399.99,
+            "has_stock": true,
+            "created_at": "2026-09-26T08:24:22Z",
+            "updated_at": "2026-10-05T08:24:22Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000007",
+            "name": "Urban Commuter Backpack",
+            "slug": "urban-commuter-backpack",
+            "description": "Designed for the modern commuter, this backpack features a padded 16-inch laptop compartment, water-resistant exterior, and ergonomic shoulder straps. Multiple organizer pockets keep your essentials within reach. The RFID-blocking pocket protects your cards.",
+            "short_description": "Water-resistant, 16\" laptop compartment, RFID pocket",
+            "brand": "PackIt",
+            "category_id": "d0000000-0000-4000-d000-000000000003",
+            "tags": [
+                "backpack",
+                "bag",
+                "commuter",
+                "laptop",
+                "travel"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/backpack-1.jpg",
+                    "alt": "Urban Commuter Backpack",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-bp-gray",
+                    "sku": "PI-UCB-GRY",
+                    "price": 89.99,
+                    "compare_at_price": 109.99,
+                    "cost_price": 35,
+                    "stock": 60,
+                    "weight": 0.85,
+                    "attributes": {
+                        "color": "Charcoal Gray"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-11T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-bp-navy",
+                    "sku": "PI-UCB-NVY",
+                    "price": 89.99,
+                    "compare_at_price": 109.99,
+                    "cost_price": 35,
+                    "stock": 45,
+                    "weight": 0.85,
+                    "attributes": {
+                        "color": "Navy Blue"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-11T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "Urban Commuter Backpack - PackIt",
+                "description": "Water-resistant backpack with laptop compartment",
+                "keywords": "backpack, commuter, laptop, packit"
+            },
+            "sort_order": 7,
+            "lowest_price": 89.99,
+            "has_stock": true,
+            "created_at": "2026-09-11T08:24:22Z",
+            "updated_at": "2026-10-04T08:24:22Z"
+        },
+        {
+            "id": "f0000000-0000-4000-f000-000000000008",
+            "name": "Nordic Arc Floor Lamp",
+            "slug": "nordic-arc-floor-lamp",
+            "description": "Bring warm, ambient light to any room with the Nordic Arc floor lamp. Its minimalist arc design in brushed brass complements modern and Scandinavian interiors alike. The linen drum shade diffuses light softly, creating a cozy atmosphere. Features a foot dimmer switch.",
+            "short_description": "Brushed brass arc, linen shade, dimmer",
+            "brand": "LumiHome",
+            "category_id": "d0000000-0000-4000-d000-000000000004",
+            "tags": [
+                "lamp",
+                "floor lamp",
+                "lighting",
+                "nordic",
+                "scandinavian"
+            ],
+            "images": [
+                {
+                    "url": "/images/products/lamp-1.jpg",
+                    "alt": "Nordic Arc Floor Lamp",
+                    "width": 800,
+                    "height": 600,
+                    "sort_order": 1
+                }
+            ],
+            "variants": [
+                {
+                    "id": "v-lamp-brass",
+                    "sku": "LH-NAF-BRS",
+                    "price": 199.99,
+                    "compare_at_price": 249.99,
+                    "cost_price": 75,
+                    "stock": 20,
+                    "weight": 5.5,
+                    "attributes": {
+                        "finish": "Brushed Brass"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 1,
+                    "created_at": "2026-09-18T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                },
+                {
+                    "id": "v-lamp-black",
+                    "sku": "LH-NAF-BLK",
+                    "price": 189.99,
+                    "compare_at_price": 239.99,
+                    "cost_price": 70,
+                    "stock": 15,
+                    "weight": 5.5,
+                    "attributes": {
+                        "finish": "Matte Black"
+                    },
+                    "images": [],
+                    "status": "ACTIVE",
+                    "position": 2,
+                    "created_at": "2026-09-18T08:24:22Z",
+                    "updated_at": "2026-10-04T08:24:22Z"
+                }
+            ],
+            "status": "ACTIVE",
+            "seo": {
+                "title": "Nordic Arc Floor Lamp - LumiHome",
+                "description": "Minimalist arc floor lamp with linen shade",
+                "keywords": "lamp, floor lamp, nordic, lighting, lumihome"
+            },
+            "sort_order": 8,
+            "lowest_price": 189.99,
+            "has_stock": true,
+            "created_at": "2026-09-18T08:24:22Z",
+            "updated_at": "2026-10-04T08:24:22Z"
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "per_page": 20,
+        "total": 9,
+        "total_pages": 1,
+        "request_id": "103e4561-35b8-40bb-a5af-d693dcc801be"
+    }
+}

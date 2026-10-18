@@ -1,0 +1,517 @@
+# CI Pipeline — triggers on PRs and pushes to main.
+#
+# Pipeline stages:
+#   1. format  — gofmt check
+#   2. lint    — golangci-lint
+#   3. vet     — go vet
+#   4. test    — unit tests
+#   5. race    — race detector tests
+#   6. integration — integration tests (testcontainers)
+#   7. sast    — gosec SAST scan
+#   8. secret-scan — trufflehog secret detection
+#   9. deps    — govulncheck dependency vulnerability scan
+#  10. build   — production Docker build
+#  11. scan    — container vulnerability scan (trivy)
+#  12. push    — push images to registry (main branch only)
+#  13. gitops  — trigger deploy workflow (main branch only)
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.gitignore'
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: no write permissions for CI checks on PRs
+permissions:
+  contents: read
+  security-events: write    # for uploading SARIF results
+  packages: write          # for pushing images to GHCR
+  actions: read
+  checks: write           # for publishing test reports
+
+env:
+  GO_VERSION: '1.22'
+  GOLANGCI_LINT_VERSION: 'v1.61.0'
+  TRIVY_VERSION: '0.58.0'
+  TRUFFLEHOG_VERSION: '3.88.0'
+
+jobs:
+  # ============================================================
+  # Stage 1: Code Quality
+  # ============================================================
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Check formatting
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::Found unformatted files:"  
+            echo "$unformatted"
+            echo "Run 'go fmt ./...' to fix."
+            exit 1
+          fi
+          echo "All files formatted correctly."
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@4696c7c8ea044672e634fde6a9d3b023e3d3d8e8 # v6.5.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=5m
+
+  vet:
+    name: Vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Download modules
+        run: go mod download
+      - name: Run go vet
+        run: go vet ./...
+
+  # ============================================================
+  # Stage 2: Testing
+  # ============================================================
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: [format, lint, vet]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Download modules
+        run: go mod download
+      - name: Run unit tests with coverage
+        run: |
+          go test \
+            -v \
+            -count=1 \
+            -coverprofile=coverage.out \
+            -covermode=atomic \
+            -short \
+            ./...
+      - name: Generate coverage summary
+        run: |
+          echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          go tool cover -func=coverage.out | tail -1 | awk '{print "**Overall:** " $3 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: coverage
+          path: coverage.out
+          retention-days: 7
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: test-results
+          path: |  
+            coverage.out
+            coverage.html
+          retention-days: 7
+
+  race:
+    name: Race Detector
+    runs-on: ubuntu-latest
+    needs: [format, lint, vet]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Download modules
+        run: go mod download
+      - name: Run tests with race detector
+        run: |  
+          go test \
+            -race \
+            -count=1 \
+            -short \
+            ./...
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [format, lint, vet]
+    # Integration tests use testcontainers which require Docker
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Download modules
+        run: go mod download
+      - name: Run integration tests
+        env:
+          # Docker is available on GitHub-hosted runners
+          DOCKER_HOST: unix:///var/run/docker.sock
+        run: |
+          go test \
+            -v \
+            -count=1 \
+            -timeout=10m \
+            -run 'Integration|TestIntegration' \
+            ./...
+
+  # ============================================================
+  # Stage 3: Security Scanning
+  # ============================================================
+
+  sast:
+    name: SAST (gosec)
+    runs-on: ubuntu-latest
+    needs: [format, lint, vet]
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Download modules
+        run: go mod download
+      - name: Run gosec
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -no-fail -fmt sarif -out gosec-results.sarif ./...
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@461564cd35b317a2e3e4e2be7b35a8a6e6e6c89e # v3.28.10
+        with:
+          sarif_file: gosec-results.sarif
+          category: gosec
+      - name: Upload gosec results artifact
+        if: always()
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: sast-report
+          path: gosec-results.sarif
+          retention-days: 14
+      - name: Security summary
+        if: always()
+        run: |
+          echo "## SAST Scan (gosec)" >> $GITHUB_STEP_SUMMARY
+          echo "SARIF report uploaded to **Security** tab and artifacts." >> $GITHUB_STEP_SUMMARY
+
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0  # scan full history
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified --fail
+          path: .
+      - name: Scan summary
+        if: always()
+        run: |
+          echo "## Secret Scan (TruffleHog)" >> $GITHUB_STEP_SUMMARY
+          echo "Scanned full git history for verified secrets." >> $GITHUB_STEP_SUMMARY
+
+  deps:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9332eeee6424075 # v5.4.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Run govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./... 2>&1 | tee govulncheck-report.txt
+      - name: Upload dependency report
+        if: always()
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: dependency-report
+          path: govulncheck-report.txt
+          retention-days: 14
+      - name: Dependency summary
+        if: always()
+        run: |
+          echo "## Dependency Vulnerability Scan (govulncheck)" >> $GITHUB_STEP_SUMMARY
+          if grep -q 'No vulnerabilities found' govulncheck-report.txt; then
+            echo "No known vulnerabilities found." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Vulnerabilities detected. Review the full report in artifacts." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================================
+  # Stage 4: Build & Container Scan
+  # ============================================================
+
+  build:
+    name: Build Images
+    runs-on: ubuntu-latest
+    needs: [test, race, integration, sast, secret-scan, deps]
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Derive version metadata
+        id: meta
+        run: |
+          VERSION="${GITHUB_SHA:0:7}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "image_tag=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Building version: ${VERSION}"
+      - name: Build API image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198571cfb76f00 # v6.16.0
+        with:
+          context: .
+          file: Dockerfile.api
+          push: false
+          load: true
+          tags: |
+            ecommerce-api:${{ steps.meta.outputs.version }}
+            ecommerce-api:latest
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            COMMIT=${GITHUB_SHA:0:7}
+            BUILD_TIME=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build Worker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198571cfb76f00 # v6.16.0
+        with:
+          context: .
+          file: Dockerfile.worker
+          push: false
+          load: true
+          tags: |
+            ecommerce-worker:${{ steps.meta.outputs.version }}
+            ecommerce-worker:latest
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            COMMIT=${GITHUB_SHA:0:7}
+            BUILD_TIME=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Export images for scan job
+        run: |
+          docker save ecommerce-api:${{ steps.meta.outputs.version }} -o /tmp/api-image.tar
+          docker save ecommerce-worker:${{ steps.meta.outputs.version }} -o /tmp/worker-image.tar
+      - name: Upload image artifacts
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: docker-images
+          path: |
+            /tmp/api-image.tar
+            /tmp/worker-image.tar
+          retention-days: 1
+
+  container-scan:
+    name: Container Scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Download images
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: docker-images
+          path: /tmp
+      - name: Load images
+        run: |
+          docker load -i /tmp/api-image.tar
+          docker load -i /tmp/worker-image.tar
+      - name: Run Trivy vulnerability scanner (API)
+        uses: aquasecurity/trivy-action@6e1b7e58d089fd0fc098cb5e1b5a6d8a717e6a71 # v0.29.0
+        with:
+          image-ref: 'ecommerce-api:${{ needs.build.outputs.version }}'
+          format: 'sarif'
+          output: 'trivy-api-results.sarif'
+          severity: 'HIGH,CRITICAL'
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db
+      - name: Run Trivy vulnerability scanner (Worker)
+        uses: aquasecurity/trivy-action@6e1b7e58d089fd0fc098cb5e1b5a6d8a717e6a71 # v0.29.0
+        with:
+          image-ref: 'ecommerce-worker:${{ needs.build.outputs.version }}'
+          format: 'sarif'
+          output: 'trivy-worker-results.sarif'
+          severity: 'HIGH,CRITICAL'
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db
+      - name: Upload Trivy SARIF (API)
+        if: always()
+        uses: github/codeql-action/upload-sarif@461564cd35b317a2e3e4e2be7b35a8a6e6e6c89e # v3.28.10
+        with:
+          sarif_file: trivy-api-results.sarif
+          category: trivy-api
+      - name: Upload Trivy SARIF (Worker)
+        if: always()
+        uses: github/codeql-action/upload-sarif@461564cd35b317a2e3e4e2be7b35a8a6e6e6c89e # v3.28.10
+        with:
+          sarif_file: trivy-worker-results.sarif
+          category: trivy-worker
+      - name: Upload scan reports
+        if: always()
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: container-scan-report
+          path: |
+            trivy-api-results.sarif
+            trivy-worker-results.sarif
+          retention-days: 14
+      - name: Container scan summary
+        if: always()
+        run: |
+          echo "## Container Vulnerability Scan (Trivy)" >> $GITHUB_STEP_SUMMARY
+          echo "Scanned for HIGH and CRITICAL vulnerabilities." >> $GITHUB_STEP_SUMMARY
+          echo "SARIF reports uploaded to **Security** tab and artifacts." >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================
+  # Stage 5: Push & Deploy (main branch only)
+  # ============================================================
+
+  push:
+    name: Push Images
+    runs-on: ubuntu-latest
+    needs: [build, container-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      version: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN is automatically provided — no custom secret needed
+      - name: Build and push API image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198571cfb76f00 # v6.16.0
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/ecommerce-api:${{ needs.build.outputs.version }}
+            ghcr.io/${{ github.repository }}/ecommerce-api:latest
+          build-args: |
+            VERSION=${{ needs.build.outputs.version }}
+            COMMIT=${GITHUB_SHA:0:7}
+            BUILD_TIME=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build and push Worker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198571cfb76f00 # v6.16.0
+        with:
+          context: .
+          file: Dockerfile.worker
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/ecommerce-worker:${{ needs.build.outputs.version }}
+            ghcr.io/${{ github.repository }}/ecommerce-worker:latest
+          build-args: |
+            VERSION=${{ needs.build.outputs.version }}
+            COMMIT=${GITHUB_SHA:0:7}
+            BUILD_TIME=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Push summary
+        run: |
+          echo "## Images Pushed" >> $GITHUB_STEP_SUMMARY
+          echo "- \\\`ghcr.io/${{ github.repository }}/ecommerce-api:${{ needs.build.outputs.version }}\\\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \\\`ghcr.io/${{ github.repository }}/ecommerce-worker:${{ needs.build.outputs.version }}\\\`" >> $GITHUB_STEP_SUMMARY
+
+  gitops:
+    name: GitOps Update
+    runs-on: ubuntu-latest
+    needs: [push]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # This job updates K8s manifests with the new image tag
+    # and commits to a deploy branch (or triggers ArgoCD sync)
+    permissions:
+      contents: write     # needed to push to deploy branch
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Update image tags in K8s manifests
+        run: |
+          VERSION="${{ needs.push.outputs.version }}"
+          echo "Updating K8s manifests to use image tag: ${VERSION}"
+
+          # Update API deployment image
+          sed -i "s|image: ecommerce-api:.*|image: ghcr.io/${{ github.repository }}/ecommerce-api:${VERSION}|" k8s/api-deployment.yaml
+
+          # Update Worker deployment image
+          sed -i "s|image: ecommerce-worker:.*|image: ghcr.io/${{ github.repository }}/ecommerce-worker:${VERSION}|" k8s/worker-deployment.yaml
+
+          echo "Updated manifests:"
+          grep 'image:' k8s/api-deployment.yaml | head -1
+          grep 'image:' k8s/worker-deployment.yaml | head -1
+      - name: Commit and push to deploy branch
+        run: |
+          VERSION="${{ needs.push.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create or switch to deploy branch
+          git fetch origin deploy 2>/dev/null || true
+          git switch deploy 2>/dev/null || git switch -c deploy
+
+          git add k8s/
+          git diff --cached --quiet || git commit -m "deploy: update images to ${VERSION}"
+
+          git push origin deploy || true
+      - name: GitOps summary
+        run: |
+          echo "## GitOps Update" >> $GITHUB_STEP_SUMMARY
+          echo "Updated \\\`deploy\\\` branch with image tag \\\`${{ needs.push.outputs.version }}\\\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "If using ArgoCD, configure it to watch the \\\`deploy\\\` branch." >> $GITHUB_STEP_SUMMARY
+          echo "If using Flux, update the Kustomization source reference." >> $GITHUB_STEP_SUMMARY

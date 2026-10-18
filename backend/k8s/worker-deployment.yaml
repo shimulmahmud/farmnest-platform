@@ -1,0 +1,128 @@
+# Deployment: ecommerce-worker
+#
+# Architecture: event-driven consumer. Processes NATS JetStream messages.
+# Scales horizontally — each replica creates its own JetStream consumers.
+# NATS JetStream delivers each message to exactly one consumer instance,
+# so multiple worker replicas share the load without duplication.
+#
+# Resource reasoning:
+#   Requests: 128Mi memory, 250m CPU — similar to API at idle.
+#   Limits:    512Mi memory, 1000m CPU.
+#   Workers are CPU-bound during message processing and I/O-bound
+#   during MongoDB writes. Memory usage is steady-state (connection pools).
+#
+# Scaling:
+#   HPA targets 80% CPU utilization. Scale up when consumer lag grows.
+#   Multiple replicas are safe — JetStream consumer groups handle distribution.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-worker
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce-worker
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: ecommerce
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ecommerce-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ecommerce-worker
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: ecommerce
+    spec:
+      serviceAccountName: ecommerce-worker
+      automountServiceAccountToken: false
+
+      # --- Security Context (pod-level) ---
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+
+      # --- Probes ---
+      # The worker has no HTTP endpoint and the distroless image has no shell
+      # utilities (curl, wget, nc) for exec-based probes.
+      # K8s considers the pod started once the container process is running.
+      # If the worker crashes at startup, K8s will restart it via the restart policy.
+      # A more robust approach is to add a health HTTP endpoint to the worker
+      # binary in a future iteration, then use httpGet probes here.
+
+      containers:
+        - name: worker
+          image: ecommerce-worker:latest
+          imagePullPolicy: IfNotPresent
+
+          # No ports exposed — worker is a consumer, not a server.
+
+          # --- Environment ---
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+            - secretRef:
+                name: ecommerce-secret
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "ecommerce-worker"
+
+          # --- Container security ---
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          # --- Resource requests/limits ---
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+
+          # --- Volume mounts ---
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      # --- Volumes ---
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+
+      # --- Topology spread for HA ---
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ecommerce-worker
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: ecommerce-worker
+                topologyKey: kubernetes.io/hostname

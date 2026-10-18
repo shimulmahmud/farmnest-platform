@@ -1,0 +1,173 @@
+# Deployment: ecommerce-api
+# 
+# Architecture: stateless HTTP server. Scales horizontally behind Service.
+# No local state — all state in MongoDB and NATS JetStream.
+#
+# Resource reasoning:
+#   Requests:  128Mi memory, 250m CPU — enough to start and serve low traffic.
+#   Limits:    512Mi memory, 1000m CPU — prevents runaway memory/CPU usage.
+#   The Go binary uses ~30-50Mi RSS at idle; 128Mi request leaves headroom
+#   for goroutine stacks, HTTP buffers, and connection pools.
+#   512Mi limit catches memory leaks before the node is OOM-killed.
+#
+# Security:
+#   - Runs as UID 65534 (nobody) — distroless/nonroot default
+#   - readOnlyRootFilesystem: true
+#   - allowPrivilegeEscalation: false
+#   - All Linux capabilities dropped
+#   - seccompProfile: runtime/default
+#   - No service account token mounted (automountServiceAccountToken: false)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-api
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce-api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: ecommerce
+spec:
+  replicas: 3
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0     # zero-downtime: always keep all replicas ready
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ecommerce-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ecommerce-api
+        app.kubernetes.io/component: api
+        app.kubernetes.io/part-of: ecommerce
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: ecommerce-api
+      automountServiceAccountToken: false
+
+      # --- Security Context (pod-level) ---
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534          # nobody (matches distroless/nonroot)
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+
+      # --- Startup probe: wait for the process to be ready to serve ---
+      # Uses the healthcheck binary built into the image (distroless has no curl).
+      # The binary GETs /health/live which returns 200 once the Fiber server is up.
+      startupProbe:
+        exec:
+          command: ["/app/healthcheck"]
+        initialDelaySeconds: 2
+        periodSeconds: 3
+        timeoutSeconds: 5
+        failureThreshold: 20   # up to 60s startup window
+
+      # --- Liveness probe: is the process alive? ---
+      livenessProbe:
+        exec:
+          command: ["/app/healthcheck"]
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+
+      # --- Readiness probe: can it serve traffic? ---
+      # Uses /health/ready which checks MongoDB + NATS connectivity.
+      # readinessProbe exec with arguments is not supported on all K8s versions,
+      # so we rely on the default healthcheck binary (which hits /health/live).
+      # For a full readiness check, use httpGet below if the cluster supports it.
+      readinessProbe:
+        httpGet:
+          path: /health/ready
+          port: 8080
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+      containers:
+        - name: api
+          image: ecommerce-api:latest   # override with --set image.tag in Helm, or kustomize
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+
+          # --- Environment ---
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+            - secretRef:
+                name: ecommerce-secret
+          env:
+            # Override OTEL_SERVICE_NAME per-component
+            - name: OTEL_SERVICE_NAME
+              value: "ecommerce-api"
+
+          # --- Container security ---
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          # --- Resource requests/limits ---
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+
+          # --- Volume mounts ---
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      # --- Volumes ---
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+
+      # --- Topology spread for HA ---
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ecommerce-api
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ecommerce-api
+
+      # --- Anti-affinity: prefer different nodes ---
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: ecommerce-api
+                topologyKey: kubernetes.io/hostname

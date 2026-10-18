@@ -1,0 +1,2324 @@
+{
+  "info": {
+    "name": "Seed: 30 mixed products (BDT)",
+    "description": "Run in order: 0 login, 1 warehouse, categories, then products (or use the Collection Runner on the whole collection). Requires admin credentials in login_email / login_password and base_url in the environment. Prices are whole BDT taka. Stock is created automatically per SKU after each product.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Login (admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"{{login_password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"login ok\", () => pm.response.to.have.status(200));",
+              "const d = pm.response.json().data;",
+              "pm.environment.set(\"access_token\", d.tokens.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Create warehouse",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/admin/inventory/warehouses",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "admin",
+            "inventory",
+            "warehouses"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Dhaka Main Warehouse\",\n  \"code\": \"DHK-01\",\n  \"address\": \"Tejgaon Industrial Area, Dhaka\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201 || pm.response.code === 200) {",
+              "  pm.collectionVariables.set(\"seed_warehouse_id\", pm.response.json().data.id);",
+              "} else if (pm.response.code === 409) {",
+              "  // already exists: find it by code",
+              "  pm.sendRequest({",
+              "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/warehouses?per_page=100\",",
+              "    method: \"GET\",",
+              "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") }",
+              "  }, (err, res) => {",
+              "    if (err || res.code !== 200) return;",
+              "    const w = (res.json().data || []).find(x => x.code === \"DHK-01\");",
+              "    if (w) { pm.collectionVariables.set(\"seed_warehouse_id\", w.id); }",
+              "  });",
+              "}",
+              "pm.test(\"warehouse ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Category: Electronics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics\",\n  \"slug\": \"electronics\",\n  \"description\": \"Electronics products\",\n  \"sort_order\": 1,\n  \"seo\": {\n    \"title\": \"Electronics\",\n    \"description\": \"Electronics\",\n    \"keywords\": \"electronics\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_electronics\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/electronics\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_electronics\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Category: Fashion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fashion\",\n  \"slug\": \"fashion\",\n  \"description\": \"Fashion products\",\n  \"sort_order\": 2,\n  \"seo\": {\n    \"title\": \"Fashion\",\n    \"description\": \"Fashion\",\n    \"keywords\": \"fashion\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_fashion\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/fashion\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_fashion\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Category: Home & Living",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Home & Living\",\n  \"slug\": \"home-living\",\n  \"description\": \"Home & Living products\",\n  \"sort_order\": 3,\n  \"seo\": {\n    \"title\": \"Home & Living\",\n    \"description\": \"Home & Living\",\n    \"keywords\": \"home-living\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_home_living\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/home-living\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_home_living\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Category: Fresh Produce",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fresh Produce\",\n  \"slug\": \"fresh-produce\",\n  \"description\": \"Fresh Produce products\",\n  \"sort_order\": 4,\n  \"seo\": {\n    \"title\": \"Fresh Produce\",\n    \"description\": \"Fresh Produce\",\n    \"keywords\": \"fresh-produce\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_fresh_produce\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/fresh-produce\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_fresh_produce\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Category: Grains & Staples",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grains & Staples\",\n  \"slug\": \"grains-staples\",\n  \"description\": \"Grains & Staples products\",\n  \"sort_order\": 5,\n  \"seo\": {\n    \"title\": \"Grains & Staples\",\n    \"description\": \"Grains & Staples\",\n    \"keywords\": \"grains-staples\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_grains_staples\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/grains-staples\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_grains_staples\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Category: Farm Inputs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Farm Inputs\",\n  \"slug\": \"farm-inputs\",\n  \"description\": \"Farm Inputs products\",\n  \"sort_order\": 6,\n  \"seo\": {\n    \"title\": \"Farm Inputs\",\n    \"description\": \"Farm Inputs\",\n    \"keywords\": \"farm-inputs\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_farm_inputs\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/farm-inputs\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_farm_inputs\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Category: Beauty & Personal Care",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Beauty & Personal Care\",\n  \"slug\": \"beauty-care\",\n  \"description\": \"Beauty & Personal Care products\",\n  \"sort_order\": 7,\n  \"seo\": {\n    \"title\": \"Beauty & Personal Care\",\n    \"description\": \"Beauty & Personal Care\",\n    \"keywords\": \"beauty-care\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"cat_beauty_care\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 409) {",
+                  "  // already exists from an earlier run: look it up by slug",
+                  "  pm.sendRequest({ url: pm.variables.get(\"base_url\") + \"/api/v1/categories/beauty-care\", method: \"GET\" }, (err, res) => {",
+                  "    if (!err && res.code === 200) { pm.collectionVariables.set(\"cat_beauty_care\", res.json().data.id); }",
+                  "  });",
+                  "}",
+                  "pm.test(\"category ready (created or already exists)\", () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Products (30)",
+      "item": [
+        {
+          "name": "01. Galaxy Nova X 5G",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Galaxy Nova X 5G\",\n  \"slug\": \"galaxy-nova-x\",\n  \"description\": \"Flagship smartphone with a 6.7-inch AMOLED display, 108MP camera system and a 5000mAh battery.\",\n  \"short_description\": \"6.7\\\" AMOLED, 108MP camera, 5G\",\n  \"brand\": \"NovaTech\",\n  \"category_id\": \"{{cat_electronics}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"display\": \"6.7 inch AMOLED\",\n    \"battery\": \"5000mAh\",\n    \"warranty\": \"1 year\"\n  },\n  \"tags\": [\n    \"phone\",\n    \"smartphone\",\n    \"5g\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/galaxy-nova-x/800/800\",\n      \"alt\": \"Galaxy Nova X 5G\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"GN-NOVA-X-256-BLK\",\n      \"options\": {\n        \"color\": \"Midnight Black\",\n        \"storage\": \"256GB\"\n      },\n      \"price\": 89990,\n      \"cost_price\": 72000,\n      \"weight_g\": 200,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 99990,\n      \"length_mm\": 165,\n      \"width_mm\": 78,\n      \"height_mm\": 9\n    },\n    {\n      \"sku\": \"GN-NOVA-X-512-BLK\",\n      \"options\": {\n        \"color\": \"Midnight Black\",\n        \"storage\": \"512GB\"\n      },\n      \"price\": 104990,\n      \"cost_price\": 84000,\n      \"weight_g\": 200,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 114990,\n      \"length_mm\": 165,\n      \"width_mm\": 78,\n      \"height_mm\": 9\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Galaxy Nova X 5G\",\n    \"description\": \"6.7\\\" AMOLED, 108MP camera, 5G\",\n    \"keywords\": [\n      \"phone\",\n      \"smartphone\",\n      \"5g\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"GN-NOVA-X-256-BLK\": 30, \"GN-NOVA-X-512-BLK\": 15};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02. ProBook Ultra 15 Laptop",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"ProBook Ultra 15 Laptop\",\n  \"slug\": \"probook-ultra-15\",\n  \"description\": \"High-performance 15.6-inch laptop with 32GB RAM and fast SSD storage for professionals.\",\n  \"short_description\": \"15.6\\\" laptop, 32GB RAM, 512GB SSD\",\n  \"brand\": \"TechPro\",\n  \"category_id\": \"{{cat_electronics}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"processor\": \"Intel Core Ultra 7\",\n    \"ram\": \"32GB\",\n    \"screen\": \"15.6 inch\",\n    \"os\": \"Windows 11\"\n  },\n  \"tags\": [\n    \"laptop\",\n    \"computer\",\n    \"professional\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/probook-ultra-15/800/800\",\n      \"alt\": \"ProBook Ultra 15 Laptop\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"PB-U15-512-SLV\",\n      \"options\": {\n        \"color\": \"Silver\",\n        \"storage\": \"512GB\"\n      },\n      \"price\": 149990,\n      \"cost_price\": 125000,\n      \"weight_g\": 1800,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 164990,\n      \"length_mm\": 350,\n      \"width_mm\": 240,\n      \"height_mm\": 20\n    },\n    {\n      \"sku\": \"PB-U15-1TB-GRY\",\n      \"options\": {\n        \"color\": \"Space Gray\",\n        \"storage\": \"1TB\"\n      },\n      \"price\": 169990,\n      \"cost_price\": 142000,\n      \"weight_g\": 1800,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 184990,\n      \"length_mm\": 350,\n      \"width_mm\": 240,\n      \"height_mm\": 20\n    }\n  ],\n  \"seo\": {\n    \"title\": \"ProBook Ultra 15 Laptop\",\n    \"description\": \"15.6\\\" laptop, 32GB RAM, 512GB SSD\",\n    \"keywords\": [\n      \"laptop\",\n      \"computer\",\n      \"professional\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"PB-U15-512-SLV\": 12, \"PB-U15-1TB-GRY\": 8};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03. SoundWave Pro ANC Headphones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"SoundWave Pro ANC Headphones\",\n  \"slug\": \"soundwave-pro-anc\",\n  \"description\": \"Wireless over-ear headphones with active noise cancellation and 30-hour battery life.\",\n  \"short_description\": \"Over-ear ANC, 30hr battery\",\n  \"brand\": \"SoundWave\",\n  \"category_id\": \"{{cat_electronics}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"battery\": \"30 hours\",\n    \"connectivity\": \"Bluetooth 5.3\"\n  },\n  \"tags\": [\n    \"headphones\",\n    \"audio\",\n    \"wireless\",\n    \"anc\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/soundwave-pro-anc/800/800\",\n      \"alt\": \"SoundWave Pro ANC Headphones\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"SW-PRO-ANC-BLK\",\n      \"options\": {\n        \"color\": \"Matte Black\"\n      },\n      \"price\": 24990,\n      \"cost_price\": 15000,\n      \"weight_g\": 250,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 29990\n    },\n    {\n      \"sku\": \"SW-PRO-ANC-WHT\",\n      \"options\": {\n        \"color\": \"Cream White\"\n      },\n      \"price\": 24990,\n      \"cost_price\": 15000,\n      \"weight_g\": 250,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 29990\n    }\n  ],\n  \"seo\": {\n    \"title\": \"SoundWave Pro ANC Headphones\",\n    \"description\": \"Over-ear ANC, 30hr battery\",\n    \"keywords\": [\n      \"headphones\",\n      \"audio\",\n      \"wireless\",\n      \"anc\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"SW-PRO-ANC-BLK\": 60, \"SW-PRO-ANC-WHT\": 40};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04. VoltMax 20000mAh Power Bank",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"VoltMax 20000mAh Power Bank\",\n  \"slug\": \"powerbank-20000\",\n  \"description\": \"Slim 20000mAh power bank with USB-C PD and dual USB-A outputs.\",\n  \"short_description\": \"20000mAh, 22.5W fast charge\",\n  \"brand\": \"VoltMax\",\n  \"category_id\": \"{{cat_electronics}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"capacity\": \"20000mAh\",\n    \"output\": \"22.5W\"\n  },\n  \"tags\": [\n    \"powerbank\",\n    \"charger\",\n    \"accessory\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/powerbank-20000/800/800\",\n      \"alt\": \"VoltMax 20000mAh Power Bank\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"VM-PB-20K-BLK\",\n      \"options\": {\n        \"color\": \"Black\"\n      },\n      \"price\": 3290,\n      \"cost_price\": 2100,\n      \"weight_g\": 430,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 3990\n    },\n    {\n      \"sku\": \"VM-PB-20K-WHT\",\n      \"options\": {\n        \"color\": \"White\"\n      },\n      \"price\": 3290,\n      \"cost_price\": 2100,\n      \"weight_g\": 430,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 3990\n    }\n  ],\n  \"seo\": {\n    \"title\": \"VoltMax 20000mAh Power Bank\",\n    \"description\": \"20000mAh, 22.5W fast charge\",\n    \"keywords\": [\n      \"powerbank\",\n      \"charger\",\n      \"accessory\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"VM-PB-20K-BLK\": 120, \"VM-PB-20K-WHT\": 80};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05. Chrono Titanium Smart Watch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Chrono Titanium Smart Watch\",\n  \"slug\": \"chrono-titanium-watch\",\n  \"description\": \"Titanium smartwatch with always-on AMOLED display, GPS and health monitoring.\",\n  \"short_description\": \"AMOLED, GPS, 7-day battery\",\n  \"brand\": \"Chrono\",\n  \"category_id\": \"{{cat_electronics}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"case\": \"Grade-5 titanium\",\n    \"water_resistance\": \"100m\"\n  },\n  \"tags\": [\n    \"watch\",\n    \"smartwatch\",\n    \"gps\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/chrono-titanium-watch/800/800\",\n      \"alt\": \"Chrono Titanium Smart Watch\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"CH-TIT-40\",\n      \"options\": {\n        \"case_size\": \"40mm\",\n        \"band\": \"Leather\"\n      },\n      \"price\": 39990,\n      \"cost_price\": 27000,\n      \"weight_g\": 55,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 44990\n    },\n    {\n      \"sku\": \"CH-TIT-44\",\n      \"options\": {\n        \"case_size\": \"44mm\",\n        \"band\": \"Titanium\"\n      },\n      \"price\": 42990,\n      \"cost_price\": 29000,\n      \"weight_g\": 65,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 47990\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Chrono Titanium Smart Watch\",\n    \"description\": \"AMOLED, GPS, 7-day battery\",\n    \"keywords\": [\n      \"watch\",\n      \"smartwatch\",\n      \"gps\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"CH-TIT-40\": 25, \"CH-TIT-44\": 18};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06. Classic Cotton Crew Tee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Classic Cotton Crew Tee\",\n  \"slug\": \"classic-cotton-tee\",\n  \"description\": \"Soft pre-shrunk cotton crew neck t-shirt for everyday wear.\",\n  \"short_description\": \"100% cotton, relaxed fit\",\n  \"brand\": \"BasicsCo\",\n  \"category_id\": \"{{cat_fashion}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"fabric\": \"100% cotton\",\n    \"fit\": \"Relaxed\"\n  },\n  \"tags\": [\n    \"tshirt\",\n    \"cotton\",\n    \"casual\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/classic-cotton-tee/800/800\",\n      \"alt\": \"Classic Cotton Crew Tee\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"BC-CCT-WHT-M\",\n      \"options\": {\n        \"color\": \"White\",\n        \"size\": \"M\"\n      },\n      \"price\": 699,\n      \"cost_price\": 300,\n      \"weight_g\": 200,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"BC-CCT-WHT-L\",\n      \"options\": {\n        \"color\": \"White\",\n        \"size\": \"L\"\n      },\n      \"price\": 699,\n      \"cost_price\": 300,\n      \"weight_g\": 220,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"BC-CCT-BLK-M\",\n      \"options\": {\n        \"color\": \"Black\",\n        \"size\": \"M\"\n      },\n      \"price\": 699,\n      \"cost_price\": 300,\n      \"weight_g\": 200,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"BC-CCT-BLK-L\",\n      \"options\": {\n        \"color\": \"Black\",\n        \"size\": \"L\"\n      },\n      \"price\": 699,\n      \"cost_price\": 300,\n      \"weight_g\": 220,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Classic Cotton Crew Tee\",\n    \"description\": \"100% cotton, relaxed fit\",\n    \"keywords\": [\n      \"tshirt\",\n      \"cotton\",\n      \"casual\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"BC-CCT-WHT-M\": 150, \"BC-CCT-WHT-L\": 150, \"BC-CCT-BLK-M\": 100, \"BC-CCT-BLK-L\": 100};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07. Slim Fit Stretch Denim Jeans",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Slim Fit Stretch Denim Jeans\",\n  \"slug\": \"slim-fit-denim\",\n  \"description\": \"Slim-fit stretch denim jeans with a modern tapered leg.\",\n  \"short_description\": \"Slim fit, stretch denim, indigo\",\n  \"brand\": \"DenimLab\",\n  \"category_id\": \"{{cat_fashion}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"fabric\": \"98% cotton, 2% elastane\"\n  },\n  \"tags\": [\n    \"jeans\",\n    \"denim\",\n    \"slim fit\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/slim-fit-denim/800/800\",\n      \"alt\": \"Slim Fit Stretch Denim Jeans\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"DL-SFD-IND-30\",\n      \"options\": {\n        \"color\": \"Indigo\",\n        \"size\": \"30\"\n      },\n      \"price\": 2490,\n      \"cost_price\": 1200,\n      \"weight_g\": 450,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 2990\n    },\n    {\n      \"sku\": \"DL-SFD-IND-32\",\n      \"options\": {\n        \"color\": \"Indigo\",\n        \"size\": \"32\"\n      },\n      \"price\": 2490,\n      \"cost_price\": 1200,\n      \"weight_g\": 480,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 2990\n    },\n    {\n      \"sku\": \"DL-SFD-IND-34\",\n      \"options\": {\n        \"color\": \"Indigo\",\n        \"size\": \"34\"\n      },\n      \"price\": 2490,\n      \"cost_price\": 1200,\n      \"weight_g\": 500,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 2990\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Slim Fit Stretch Denim Jeans\",\n    \"description\": \"Slim fit, stretch denim, indigo\",\n    \"keywords\": [\n      \"jeans\",\n      \"denim\",\n      \"slim fit\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"DL-SFD-IND-30\": 60, \"DL-SFD-IND-32\": 80, \"DL-SFD-IND-34\": 60};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08. Embroidered Cotton Panjabi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Embroidered Cotton Panjabi\",\n  \"slug\": \"cotton-panjabi\",\n  \"description\": \"Comfortable cotton panjabi with chest embroidery, ideal for Eid and weddings.\",\n  \"short_description\": \"Festive cotton panjabi\",\n  \"brand\": \"Aarong Style\",\n  \"category_id\": \"{{cat_fashion}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"fabric\": \"Cotton\",\n    \"care\": \"Machine wash cold\"\n  },\n  \"tags\": [\n    \"panjabi\",\n    \"festive\",\n    \"men\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/cotton-panjabi/800/800\",\n      \"alt\": \"Embroidered Cotton Panjabi\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"AS-PNJ-WHT-M\",\n      \"options\": {\n        \"color\": \"Off White\",\n        \"size\": \"M\"\n      },\n      \"price\": 2990,\n      \"cost_price\": 1500,\n      \"weight_g\": 380,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 3490\n    },\n    {\n      \"sku\": \"AS-PNJ-WHT-L\",\n      \"options\": {\n        \"color\": \"Off White\",\n        \"size\": \"L\"\n      },\n      \"price\": 2990,\n      \"cost_price\": 1500,\n      \"weight_g\": 400,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 3490\n    },\n    {\n      \"sku\": \"AS-PNJ-NVY-L\",\n      \"options\": {\n        \"color\": \"Navy\",\n        \"size\": \"L\"\n      },\n      \"price\": 3190,\n      \"cost_price\": 1600,\n      \"weight_g\": 400,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 3690\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Embroidered Cotton Panjabi\",\n    \"description\": \"Festive cotton panjabi\",\n    \"keywords\": [\n      \"panjabi\",\n      \"festive\",\n      \"men\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"AS-PNJ-WHT-M\": 40, \"AS-PNJ-WHT-L\": 40, \"AS-PNJ-NVY-L\": 30};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09. Everyday Canvas Sneakers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Everyday Canvas Sneakers\",\n  \"slug\": \"canvas-sneakers\",\n  \"description\": \"Breathable canvas sneakers with cushioned insole.\",\n  \"short_description\": \"Lightweight canvas sneakers\",\n  \"brand\": \"StepUp\",\n  \"category_id\": \"{{cat_fashion}}\",\n  \"unit\": \"pair\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"upper\": \"Canvas\",\n    \"sole\": \"Rubber\"\n  },\n  \"tags\": [\n    \"shoes\",\n    \"sneakers\",\n    \"casual\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/canvas-sneakers/800/800\",\n      \"alt\": \"Everyday Canvas Sneakers\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"SU-CNV-WHT-41\",\n      \"options\": {\n        \"color\": \"White\",\n        \"size\": \"41\"\n      },\n      \"price\": 1890,\n      \"cost_price\": 950,\n      \"weight_g\": 700,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"SU-CNV-WHT-42\",\n      \"options\": {\n        \"color\": \"White\",\n        \"size\": \"42\"\n      },\n      \"price\": 1890,\n      \"cost_price\": 950,\n      \"weight_g\": 720,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"SU-CNV-BLK-42\",\n      \"options\": {\n        \"color\": \"Black\",\n        \"size\": \"42\"\n      },\n      \"price\": 1890,\n      \"cost_price\": 950,\n      \"weight_g\": 720,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Everyday Canvas Sneakers\",\n    \"description\": \"Lightweight canvas sneakers\",\n    \"keywords\": [\n      \"shoes\",\n      \"sneakers\",\n      \"casual\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"SU-CNV-WHT-41\": 50, \"SU-CNV-WHT-42\": 50, \"SU-CNV-BLK-42\": 40};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10. Smart Rice Cooker 1.8L",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Smart Rice Cooker 1.8L\",\n  \"slug\": \"rice-cooker-18l\",\n  \"description\": \"Electric rice cooker with non-stick inner pot and automatic keep-warm.\",\n  \"short_description\": \"1.8L, keep-warm, non-stick\",\n  \"brand\": \"HomeChef\",\n  \"category_id\": \"{{cat_home_living}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"capacity\": \"1.8L\",\n    \"power\": \"700W\",\n    \"warranty\": \"1 year\"\n  },\n  \"tags\": [\n    \"kitchen\",\n    \"rice cooker\",\n    \"appliance\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/rice-cooker-18l/800/800\",\n      \"alt\": \"Smart Rice Cooker 1.8L\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"HC-RC-18-WHT\",\n      \"options\": {\n        \"color\": \"White\"\n      },\n      \"price\": 3990,\n      \"cost_price\": 2600,\n      \"weight_g\": 2800,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 4590,\n      \"length_mm\": 300,\n      \"width_mm\": 300,\n      \"height_mm\": 260\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Smart Rice Cooker 1.8L\",\n    \"description\": \"1.8L, keep-warm, non-stick\",\n    \"keywords\": [\n      \"kitchen\",\n      \"rice cooker\",\n      \"appliance\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"HC-RC-18-WHT\": 45};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11. Nordic Arc Floor Lamp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Nordic Arc Floor Lamp\",\n  \"slug\": \"nordic-arc-lamp\",\n  \"description\": \"Minimalist arc floor lamp with linen drum shade and foot dimmer.\",\n  \"short_description\": \"Brushed brass arc, linen shade\",\n  \"brand\": \"LumiHome\",\n  \"category_id\": \"{{cat_home_living}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"bulb\": \"E27\",\n    \"material\": \"Brass\"\n  },\n  \"tags\": [\n    \"lamp\",\n    \"lighting\",\n    \"nordic\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/nordic-arc-lamp/800/800\",\n      \"alt\": \"Nordic Arc Floor Lamp\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"LH-NAF-BRS\",\n      \"options\": {\n        \"finish\": \"Brushed Brass\"\n      },\n      \"price\": 8990,\n      \"cost_price\": 5200,\n      \"weight_g\": 5500,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 10990,\n      \"length_mm\": 350,\n      \"width_mm\": 240,\n      \"height_mm\": 1800\n    },\n    {\n      \"sku\": \"LH-NAF-BLK\",\n      \"options\": {\n        \"finish\": \"Matte Black\"\n      },\n      \"price\": 8490,\n      \"cost_price\": 4900,\n      \"weight_g\": 5500,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 10490,\n      \"length_mm\": 350,\n      \"width_mm\": 240,\n      \"height_mm\": 1800\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Nordic Arc Floor Lamp\",\n    \"description\": \"Brushed brass arc, linen shade\",\n    \"keywords\": [\n      \"lamp\",\n      \"lighting\",\n      \"nordic\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"LH-NAF-BRS\": 20, \"LH-NAF-BLK\": 15};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12. Insulated Steel Water Bottle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Insulated Steel Water Bottle\",\n  \"slug\": \"steel-water-bottle\",\n  \"description\": \"Double-wall vacuum insulated stainless steel bottle.\",\n  \"short_description\": \"Keeps cold 24h, hot 12h\",\n  \"brand\": \"HydroMate\",\n  \"category_id\": \"{{cat_home_living}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"material\": \"304 stainless steel\"\n  },\n  \"tags\": [\n    \"bottle\",\n    \"steel\",\n    \"insulated\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/steel-water-bottle/800/800\",\n      \"alt\": \"Insulated Steel Water Bottle\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"HM-ISB-750-BLU\",\n      \"options\": {\n        \"color\": \"Blue\",\n        \"capacity\": \"750ml\"\n      },\n      \"price\": 1190,\n      \"cost_price\": 600,\n      \"weight_g\": 380,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"HM-ISB-1000-BLK\",\n      \"options\": {\n        \"color\": \"Black\",\n        \"capacity\": \"1L\"\n      },\n      \"price\": 1390,\n      \"cost_price\": 700,\n      \"weight_g\": 450,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Insulated Steel Water Bottle\",\n    \"description\": \"Keeps cold 24h, hot 12h\",\n    \"keywords\": [\n      \"bottle\",\n      \"steel\",\n      \"insulated\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"HM-ISB-750-BLU\": 90, \"HM-ISB-1000-BLK\": 70};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13. Rajshahi Himsagar Mango",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Rajshahi Himsagar Mango\",\n  \"slug\": \"himsagar-mango\",\n  \"description\": \"Hand-picked Himsagar mangoes from Rajshahi, naturally ripened and formalin-free.\",\n  \"short_description\": \"Chemical-free Himsagar, sweet and fiberless\",\n  \"brand\": \"Rajshahi Orchards\",\n  \"category_id\": \"{{cat_fresh_produce}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Rajshahi\",\n    \"grade\": \"A\",\n    \"shelf_life_days\": \"5\"\n  },\n  \"tags\": [\n    \"mango\",\n    \"fruit\",\n    \"seasonal\",\n    \"rajshahi\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/himsagar-mango/800/800\",\n      \"alt\": \"Rajshahi Himsagar Mango\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"RO-HIM-2KG\",\n      \"options\": {\n        \"pack\": \"2kg\"\n      },\n      \"price\": 460,\n      \"cost_price\": 300,\n      \"weight_g\": 2000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"RO-HIM-5KG\",\n      \"options\": {\n        \"pack\": \"5kg\"\n      },\n      \"price\": 1100,\n      \"cost_price\": 720,\n      \"weight_g\": 5000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"RO-HIM-10KG\",\n      \"options\": {\n        \"pack\": \"10kg\"\n      },\n      \"price\": 2100,\n      \"cost_price\": 1400,\n      \"weight_g\": 10000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Rajshahi Himsagar Mango\",\n    \"description\": \"Chemical-free Himsagar, sweet and fiberless\",\n    \"keywords\": [\n      \"mango\",\n      \"fruit\",\n      \"seasonal\",\n      \"rajshahi\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"RO-HIM-2KG\": 100, \"RO-HIM-5KG\": 60, \"RO-HIM-10KG\": 30};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14. Fresh Country Tomato",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Fresh Country Tomato\",\n  \"slug\": \"fresh-tomato\",\n  \"description\": \"Firm, ripe country tomatoes harvested within 24 hours of dispatch.\",\n  \"short_description\": \"Farm-fresh, pesticide-safe tomatoes\",\n  \"brand\": \"Bogura Farms\",\n  \"category_id\": \"{{cat_fresh_produce}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Bogura\",\n    \"grade\": \"A\"\n  },\n  \"tags\": [\n    \"vegetable\",\n    \"tomato\",\n    \"fresh\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/fresh-tomato/800/800\",\n      \"alt\": \"Fresh Country Tomato\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"BF-TOM-1KG\",\n      \"options\": {\n        \"pack\": \"1kg\"\n      },\n      \"price\": 80,\n      \"cost_price\": 50,\n      \"weight_g\": 1000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"BF-TOM-5KG\",\n      \"options\": {\n        \"pack\": \"5kg\"\n      },\n      \"price\": 380,\n      \"cost_price\": 240,\n      \"weight_g\": 5000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Fresh Country Tomato\",\n    \"description\": \"Farm-fresh, pesticide-safe tomatoes\",\n    \"keywords\": [\n      \"vegetable\",\n      \"tomato\",\n      \"fresh\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"BF-TOM-1KG\": 200, \"BF-TOM-5KG\": 80};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15. Desi Red Potato",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Desi Red Potato\",\n  \"slug\": \"red-potato\",\n  \"description\": \"Firm red potatoes from Munshiganj, ideal for curry and frying.\",\n  \"short_description\": \"Cold-stored red potato\",\n  \"brand\": \"Munshiganj Growers\",\n  \"category_id\": \"{{cat_fresh_produce}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Munshiganj\"\n  },\n  \"tags\": [\n    \"vegetable\",\n    \"potato\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/red-potato/800/800\",\n      \"alt\": \"Desi Red Potato\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"MG-POT-2KG\",\n      \"options\": {\n        \"pack\": \"2kg\"\n      },\n      \"price\": 110,\n      \"cost_price\": 70,\n      \"weight_g\": 2000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"MG-POT-10KG\",\n      \"options\": {\n        \"pack\": \"10kg\"\n      },\n      \"price\": 520,\n      \"cost_price\": 340,\n      \"weight_g\": 10000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Desi Red Potato\",\n    \"description\": \"Cold-stored red potato\",\n    \"keywords\": [\n      \"vegetable\",\n      \"potato\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"MG-POT-2KG\": 150, \"MG-POT-10KG\": 60};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16. Fresh Green Chili",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Fresh Green Chili\",\n  \"slug\": \"green-chili\",\n  \"description\": \"Fresh, hot green chilies picked and packed on the same day.\",\n  \"short_description\": \"Spicy green chili\",\n  \"brand\": \"Jashore Greens\",\n  \"category_id\": \"{{cat_fresh_produce}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Jashore\",\n    \"heat\": \"High\"\n  },\n  \"tags\": [\n    \"vegetable\",\n    \"chili\",\n    \"spice\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/green-chili/800/800\",\n      \"alt\": \"Fresh Green Chili\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"JG-CHL-250G\",\n      \"options\": {\n        \"pack\": \"250g\"\n      },\n      \"price\": 40,\n      \"cost_price\": 24,\n      \"weight_g\": 250,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"JG-CHL-1KG\",\n      \"options\": {\n        \"pack\": \"1kg\"\n      },\n      \"price\": 150,\n      \"cost_price\": 95,\n      \"weight_g\": 1000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Fresh Green Chili\",\n    \"description\": \"Spicy green chili\",\n    \"keywords\": [\n      \"vegetable\",\n      \"chili\",\n      \"spice\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"JG-CHL-250G\": 180, \"JG-CHL-1KG\": 90};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17. Farm Fresh Desi Eggs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Farm Fresh Desi Eggs\",\n  \"slug\": \"farm-eggs-dozen\",\n  \"description\": \"Free-range desi eggs, packed in protective trays.\",\n  \"short_description\": \"Free-range desi eggs\",\n  \"brand\": \"Savar Poultry\",\n  \"category_id\": \"{{cat_fresh_produce}}\",\n  \"unit\": \"dozen\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Savar\",\n    \"type\": \"Free-range\"\n  },\n  \"tags\": [\n    \"eggs\",\n    \"protein\",\n    \"fresh\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/farm-eggs-dozen/800/800\",\n      \"alt\": \"Farm Fresh Desi Eggs\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"SP-EGG-12\",\n      \"options\": {\n        \"pack\": \"12 pcs\"\n      },\n      \"price\": 240,\n      \"cost_price\": 170,\n      \"weight_g\": 900,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"SP-EGG-30\",\n      \"options\": {\n        \"pack\": \"30 pcs\"\n      },\n      \"price\": 580,\n      \"cost_price\": 410,\n      \"weight_g\": 2200,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Farm Fresh Desi Eggs\",\n    \"description\": \"Free-range desi eggs\",\n    \"keywords\": [\n      \"eggs\",\n      \"protein\",\n      \"fresh\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"SP-EGG-12\": 120, \"SP-EGG-30\": 60};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "18. Premium Miniket Rice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Premium Miniket Rice\",\n  \"slug\": \"miniket-rice\",\n  \"description\": \"Premium miniket rice from Dinajpur, aged and polish-free.\",\n  \"short_description\": \"Polish-free, aromatic miniket\",\n  \"brand\": \"Dinajpur Mills\",\n  \"category_id\": \"{{cat_grains_staples}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Dinajpur\",\n    \"type\": \"Miniket\"\n  },\n  \"tags\": [\n    \"rice\",\n    \"staple\",\n    \"miniket\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/miniket-rice/800/800\",\n      \"alt\": \"Premium Miniket Rice\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"DM-MNK-5KG\",\n      \"options\": {\n        \"pack\": \"5kg\"\n      },\n      \"price\": 430,\n      \"cost_price\": 330,\n      \"weight_g\": 5000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"DM-MNK-25KG\",\n      \"options\": {\n        \"pack\": \"25kg\"\n      },\n      \"price\": 2050,\n      \"cost_price\": 1600,\n      \"weight_g\": 25000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Premium Miniket Rice\",\n    \"description\": \"Polish-free, aromatic miniket\",\n    \"keywords\": [\n      \"rice\",\n      \"staple\",\n      \"miniket\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"DM-MNK-5KG\": 200, \"DM-MNK-25KG\": 50};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "19. Cold-Pressed Mustard Oil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Cold-Pressed Mustard Oil\",\n  \"slug\": \"mustard-oil\",\n  \"description\": \"Pure mustard oil pressed in traditional wooden ghani, no additives.\",\n  \"short_description\": \"Traditional kolhu-pressed mustard oil\",\n  \"brand\": \"Pabna Ghani\",\n  \"category_id\": \"{{cat_grains_staples}}\",\n  \"unit\": \"litre\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Pabna\",\n    \"process\": \"Cold-pressed\"\n  },\n  \"tags\": [\n    \"oil\",\n    \"mustard\",\n    \"cooking\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/mustard-oil/800/800\",\n      \"alt\": \"Cold-Pressed Mustard Oil\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"PG-MO-1L\",\n      \"options\": {\n        \"pack\": \"1L\"\n      },\n      \"price\": 320,\n      \"cost_price\": 240,\n      \"weight_g\": 920,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"PG-MO-5L\",\n      \"options\": {\n        \"pack\": \"5L\"\n      },\n      \"price\": 1550,\n      \"cost_price\": 1180,\n      \"weight_g\": 4600,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Cold-Pressed Mustard Oil\",\n    \"description\": \"Traditional kolhu-pressed mustard oil\",\n    \"keywords\": [\n      \"oil\",\n      \"mustard\",\n      \"cooking\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"PG-MO-1L\": 150, \"PG-MO-5L\": 50};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "20. Desi Masur Dal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Desi Masur Dal\",\n  \"slug\": \"masur-dal\",\n  \"description\": \"Unpolished red lentils, cleaned and sorted for quick cooking.\",\n  \"short_description\": \"Cleaned, unpolished red lentils\",\n  \"brand\": \"Pabna Pulses\",\n  \"category_id\": \"{{cat_grains_staples}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Pabna\"\n  },\n  \"tags\": [\n    \"lentil\",\n    \"dal\",\n    \"pulse\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/masur-dal/800/800\",\n      \"alt\": \"Desi Masur Dal\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"PP-MSR-1KG\",\n      \"options\": {\n        \"pack\": \"1kg\"\n      },\n      \"price\": 150,\n      \"cost_price\": 110,\n      \"weight_g\": 1000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"PP-MSR-5KG\",\n      \"options\": {\n        \"pack\": \"5kg\"\n      },\n      \"price\": 720,\n      \"cost_price\": 540,\n      \"weight_g\": 5000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Desi Masur Dal\",\n    \"description\": \"Cleaned, unpolished red lentils\",\n    \"keywords\": [\n      \"lentil\",\n      \"dal\",\n      \"pulse\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"PP-MSR-1KG\": 200, \"PP-MSR-5KG\": 60};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "21. Sundarban Wild Honey",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Sundarban Wild Honey\",\n  \"slug\": \"sundarban-honey\",\n  \"description\": \"Raw wild honey collected from the Sundarbans, unprocessed.\",\n  \"short_description\": \"Raw wild honey, no sugar added\",\n  \"brand\": \"Khalisha Honey\",\n  \"category_id\": \"{{cat_grains_staples}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Sundarbans\",\n    \"type\": \"Raw\"\n  },\n  \"tags\": [\n    \"honey\",\n    \"natural\",\n    \"sundarban\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/sundarban-honey/800/800\",\n      \"alt\": \"Sundarban Wild Honey\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"KH-HNY-500G\",\n      \"options\": {\n        \"pack\": \"500g\"\n      },\n      \"price\": 650,\n      \"cost_price\": 470,\n      \"weight_g\": 650,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"KH-HNY-1KG\",\n      \"options\": {\n        \"pack\": \"1kg\"\n      },\n      \"price\": 1250,\n      \"cost_price\": 900,\n      \"weight_g\": 1250,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Sundarban Wild Honey\",\n    \"description\": \"Raw wild honey, no sugar added\",\n    \"keywords\": [\n      \"honey\",\n      \"natural\",\n      \"sundarban\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"KH-HNY-500G\": 80, \"KH-HNY-1KG\": 50};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "22. Chattogram Dried Shutki",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Chattogram Dried Shutki\",\n  \"slug\": \"ctg-dried-fish\",\n  \"description\": \"Hygienically sun-dried shutki, vacuum packed.\",\n  \"short_description\": \"Sun-dried loitta shutki\",\n  \"brand\": \"Coastal Foods\",\n  \"category_id\": \"{{cat_grains_staples}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"origin\": \"Chattogram\"\n  },\n  \"tags\": [\n    \"dried fish\",\n    \"shutki\",\n    \"coastal\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/ctg-dried-fish/800/800\",\n      \"alt\": \"Chattogram Dried Shutki\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"CF-SHT-250G\",\n      \"options\": {\n        \"pack\": \"250g\"\n      },\n      \"price\": 380,\n      \"cost_price\": 260,\n      \"weight_g\": 300,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"CF-SHT-500G\",\n      \"options\": {\n        \"pack\": \"500g\"\n      },\n      \"price\": 720,\n      \"cost_price\": 500,\n      \"weight_g\": 550,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Chattogram Dried Shutki\",\n    \"description\": \"Sun-dried loitta shutki\",\n    \"keywords\": [\n      \"dried fish\",\n      \"shutki\",\n      \"coastal\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"CF-SHT-250G\": 70, \"CF-SHT-500G\": 40};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "23. Hybrid Boro Rice Seed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Hybrid Boro Rice Seed\",\n  \"slug\": \"hybrid-rice-seed\",\n  \"description\": \"Certified high-yield hybrid rice seed suited for boro season.\",\n  \"short_description\": \"High-yield hybrid boro seed\",\n  \"brand\": \"BRRI Select\",\n  \"category_id\": \"{{cat_farm_inputs}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"season\": \"Boro\",\n    \"germination\": \"90%+\"\n  },\n  \"tags\": [\n    \"seed\",\n    \"rice\",\n    \"hybrid\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/hybrid-rice-seed/800/800\",\n      \"alt\": \"Hybrid Boro Rice Seed\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"BS-HRS-1KG\",\n      \"options\": {\n        \"pack\": \"1kg\"\n      },\n      \"price\": 450,\n      \"cost_price\": 340,\n      \"weight_g\": 1000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"BS-HRS-5KG\",\n      \"options\": {\n        \"pack\": \"5kg\"\n      },\n      \"price\": 2100,\n      \"cost_price\": 1600,\n      \"weight_g\": 5000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Hybrid Boro Rice Seed\",\n    \"description\": \"High-yield hybrid boro seed\",\n    \"keywords\": [\n      \"seed\",\n      \"rice\",\n      \"hybrid\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"BS-HRS-1KG\": 150, \"BS-HRS-5KG\": 60};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "24. Organic Vermicompost",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Organic Vermicompost\",\n  \"slug\": \"organic-compost\",\n  \"description\": \"Vermicompost made from cow dung and kitchen waste, odour-free.\",\n  \"short_description\": \"Nutrient-rich organic compost\",\n  \"brand\": \"GreenSoil\",\n  \"category_id\": \"{{cat_farm_inputs}}\",\n  \"unit\": \"kg\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"npk\": \"2-1-1\",\n    \"type\": \"Organic\"\n  },\n  \"tags\": [\n    \"fertilizer\",\n    \"organic\",\n    \"compost\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/organic-compost/800/800\",\n      \"alt\": \"Organic Vermicompost\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"GS-VCP-5KG\",\n      \"options\": {\n        \"pack\": \"5kg\"\n      },\n      \"price\": 320,\n      \"cost_price\": 220,\n      \"weight_g\": 5000,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"GS-VCP-25KG\",\n      \"options\": {\n        \"pack\": \"25kg\"\n      },\n      \"price\": 1450,\n      \"cost_price\": 1050,\n      \"weight_g\": 25000,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Organic Vermicompost\",\n    \"description\": \"Nutrient-rich organic compost\",\n    \"keywords\": [\n      \"fertilizer\",\n      \"organic\",\n      \"compost\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"GS-VCP-5KG\": 120, \"GS-VCP-25KG\": 50};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "25. Drip Irrigation Starter Kit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Drip Irrigation Starter Kit\",\n  \"slug\": \"drip-irrigation-kit\",\n  \"description\": \"Complete drip kit with tubing, drippers and connectors for small plots.\",\n  \"short_description\": \"Covers up to 100 plants\",\n  \"brand\": \"AquaFarm\",\n  \"category_id\": \"{{cat_farm_inputs}}\",\n  \"unit\": \"kit\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"coverage\": \"100 plants\",\n    \"tubing\": \"50m\"\n  },\n  \"tags\": [\n    \"irrigation\",\n    \"drip\",\n    \"farm\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/drip-irrigation-kit/800/800\",\n      \"alt\": \"Drip Irrigation Starter Kit\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"AF-DRP-100\",\n      \"options\": {\n        \"coverage\": \"100 plants\"\n      },\n      \"price\": 2890,\n      \"cost_price\": 2000,\n      \"weight_g\": 3200,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 3390\n    },\n    {\n      \"sku\": \"AF-DRP-500\",\n      \"options\": {\n        \"coverage\": \"500 plants\"\n      },\n      \"price\": 11900,\n      \"cost_price\": 8800,\n      \"weight_g\": 14500,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 13500\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Drip Irrigation Starter Kit\",\n    \"description\": \"Covers up to 100 plants\",\n    \"keywords\": [\n      \"irrigation\",\n      \"drip\",\n      \"farm\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"AF-DRP-100\": 35, \"AF-DRP-500\": 12};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "26. Knapsack Sprayer 16L",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Knapsack Sprayer 16L\",\n  \"slug\": \"knapsack-sprayer-16l\",\n  \"description\": \"Durable 16-litre knapsack sprayer with adjustable nozzle.\",\n  \"short_description\": \"Manual 16L pesticide/water sprayer\",\n  \"brand\": \"AgroPro\",\n  \"category_id\": \"{{cat_farm_inputs}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"capacity\": \"16L\",\n    \"type\": \"Manual\"\n  },\n  \"tags\": [\n    \"sprayer\",\n    \"tool\",\n    \"farm\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/knapsack-sprayer-16l/800/800\",\n      \"alt\": \"Knapsack Sprayer 16L\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"AP-SPR-16L\",\n      \"options\": {\n        \"capacity\": \"16L\"\n      },\n      \"price\": 2250,\n      \"cost_price\": 1600,\n      \"weight_g\": 3500,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 2590\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Knapsack Sprayer 16L\",\n    \"description\": \"Manual 16L pesticide/water sprayer\",\n    \"keywords\": [\n      \"sprayer\",\n      \"tool\",\n      \"farm\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"AP-SPR-16L\": 40};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "27. Garden Hand Tool Set (5 pcs)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Garden Hand Tool Set (5 pcs)\",\n  \"slug\": \"garden-tool-set\",\n  \"description\": \"Five-piece steel garden tool set with ergonomic grips.\",\n  \"short_description\": \"Trowel, fork, pruner and more\",\n  \"brand\": \"AgroPro\",\n  \"category_id\": \"{{cat_farm_inputs}}\",\n  \"unit\": \"set\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"pieces\": \"5\",\n    \"material\": \"Carbon steel\"\n  },\n  \"tags\": [\n    \"tools\",\n    \"garden\",\n    \"farm\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/garden-tool-set/800/800\",\n      \"alt\": \"Garden Hand Tool Set (5 pcs)\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"AP-GTS-5\",\n      \"options\": {\n        \"set\": \"5 pcs\"\n      },\n      \"price\": 1290,\n      \"cost_price\": 850,\n      \"weight_g\": 1400,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 1590\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Garden Hand Tool Set (5 pcs)\",\n    \"description\": \"Trowel, fork, pruner and more\",\n    \"keywords\": [\n      \"tools\",\n      \"garden\",\n      \"farm\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"AP-GTS-5\": 60};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "28. Herbal Neem Soap",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Herbal Neem Soap\",\n  \"slug\": \"neem-soap\",\n  \"description\": \"Handmade herbal soap with neem and tulsi, free from parabens.\",\n  \"short_description\": \"Antibacterial neem & tulsi soap\",\n  \"brand\": \"Prokriti\",\n  \"category_id\": \"{{cat_beauty_care}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"weight\": \"100g\",\n    \"type\": \"Handmade\"\n  },\n  \"tags\": [\n    \"soap\",\n    \"herbal\",\n    \"neem\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/neem-soap/800/800\",\n      \"alt\": \"Herbal Neem Soap\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"PK-NMS-1\",\n      \"options\": {\n        \"pack\": \"1 bar\"\n      },\n      \"price\": 90,\n      \"cost_price\": 50,\n      \"weight_g\": 110,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"PK-NMS-4\",\n      \"options\": {\n        \"pack\": \"4 bars\"\n      },\n      \"price\": 330,\n      \"cost_price\": 190,\n      \"weight_g\": 440,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Herbal Neem Soap\",\n    \"description\": \"Antibacterial neem & tulsi soap\",\n    \"keywords\": [\n      \"soap\",\n      \"herbal\",\n      \"neem\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"PK-NMS-1\": 300, \"PK-NMS-4\": 120};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "29. Pure Coconut Hair Oil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Pure Coconut Hair Oil\",\n  \"slug\": \"coconut-hair-oil\",\n  \"description\": \"Pure cold-pressed coconut oil for hair and skin.\",\n  \"short_description\": \"Cold-pressed coconut oil\",\n  \"brand\": \"Prokriti\",\n  \"category_id\": \"{{cat_beauty_care}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"process\": \"Cold-pressed\"\n  },\n  \"tags\": [\n    \"oil\",\n    \"hair\",\n    \"coconut\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/coconut-hair-oil/800/800\",\n      \"alt\": \"Pure Coconut Hair Oil\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"PK-CHO-200\",\n      \"options\": {\n        \"size\": \"200ml\"\n      },\n      \"price\": 290,\n      \"cost_price\": 190,\n      \"weight_g\": 230,\n      \"requires_shipping\": true\n    },\n    {\n      \"sku\": \"PK-CHO-500\",\n      \"options\": {\n        \"size\": \"500ml\"\n      },\n      \"price\": 640,\n      \"cost_price\": 430,\n      \"weight_g\": 560,\n      \"requires_shipping\": true\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Pure Coconut Hair Oil\",\n    \"description\": \"Cold-pressed coconut oil\",\n    \"keywords\": [\n      \"oil\",\n      \"hair\",\n      \"coconut\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"PK-CHO-200\": 150, \"PK-CHO-500\": 80};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "30. Charcoal Face Wash",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\",\n  \"name\": \"Charcoal Face Wash\",\n  \"slug\": \"charcoal-face-wash\",\n  \"description\": \"Activated charcoal face wash that removes oil and impurities.\",\n  \"short_description\": \"Deep cleansing, oil control\",\n  \"brand\": \"ClearSkin\",\n  \"category_id\": \"{{cat_beauty_care}}\",\n  \"unit\": \"piece\",\n  \"currency\": \"BDT\",\n  \"specs\": {\n    \"skin_type\": \"Oily\"\n  },\n  \"tags\": [\n    \"facewash\",\n    \"skincare\"\n  ],\n  \"images\": [\n    {\n      \"url\": \"https://picsum.photos/seed/charcoal-face-wash/800/800\",\n      \"alt\": \"Charcoal Face Wash\",\n      \"sort_order\": 1\n    }\n  ],\n  \"variants\": [\n    {\n      \"sku\": \"CS-CFW-100\",\n      \"options\": {\n        \"size\": \"100ml\"\n      },\n      \"price\": 420,\n      \"cost_price\": 260,\n      \"weight_g\": 130,\n      \"requires_shipping\": true,\n      \"compare_at_price\": 490\n    }\n  ],\n  \"seo\": {\n    \"title\": \"Charcoal Face Wash\",\n    \"description\": \"Deep cleansing, oil control\",\n    \"keywords\": [\n      \"facewash\",\n      \"skincare\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"product created or already exists\", () => pm.expect(pm.response.code).to.be.oneOf([201, 409]));",
+                  "if (pm.response.code !== 201) { return; }",
+                  "const stock = {\"CS-CFW-100\": 140};",
+                  "const wh = pm.collectionVariables.get(\"seed_warehouse_id\");",
+                  "(pm.response.json().data.variants || []).forEach(v => {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get(\"base_url\") + \"/api/v1/admin/inventory/stock\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\", \"Authorization\": \"Bearer \" + pm.variables.get(\"access_token\") },",
+                  "    body: { mode: \"raw\", raw: JSON.stringify({ sku: v.sku, warehouse_id: wh, total_stock: stock[v.sku] || 50, low_stock_threshold: 5 }) }",
+                  "  }, () => {});",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "seed_warehouse_id",
+      "value": ""
+    },
+    {
+      "key": "cat_electronics",
+      "value": ""
+    },
+    {
+      "key": "cat_fashion",
+      "value": ""
+    },
+    {
+      "key": "cat_home_living",
+      "value": ""
+    },
+    {
+      "key": "cat_fresh_produce",
+      "value": ""
+    },
+    {
+      "key": "cat_grains_staples",
+      "value": ""
+    },
+    {
+      "key": "cat_farm_inputs",
+      "value": ""
+    },
+    {
+      "key": "cat_beauty_care",
+      "value": ""
+    }
+  ]
+}

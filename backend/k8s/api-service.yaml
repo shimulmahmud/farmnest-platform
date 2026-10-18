@@ -1,0 +1,26 @@
+# Service: ecommerce-api
+# Exposes the HTTP API for internal cluster traffic.
+# External traffic comes through the Ingress resource.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-api
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce-api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: ecommerce
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ecommerce-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP

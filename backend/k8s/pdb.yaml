@@ -1,0 +1,34 @@
+# PodDisruptionBudget
+# 
+# API: require at least 2 available pods during voluntary disruptions.
+# With 3 replicas and maxUnavailable=1 in the Deployment,
+# this PDB ensures at least 2 pods serve traffic during node drains.
+#
+# Worker: require at least 1 available. Workers share load via JetStream
+# consumer groups, so brief reduced capacity is acceptable.
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecommerce-api
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce-api
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ecommerce-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecommerce-worker
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce-worker
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ecommerce-worker

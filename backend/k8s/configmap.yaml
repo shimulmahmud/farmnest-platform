@@ -1,0 +1,58 @@
+# ConfigMap for non-secret configuration.
+# Secrets (JWT, MongoDB URI with auth, webhook secrets) go in the Secret object.
+#
+# Resource reasoning:
+# - ConfigMap values are injected as env vars, not mounted as files,
+#   because the Go application reads config from environment variables.
+# - Splitting non-secret from secret config allows different RBAC policies.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: ecommerce
+  labels:
+    app.kubernetes.io/part-of: ecommerce
+data:
+  # Application
+  APP_ENV: "production"
+
+  # Server
+  SERVER_HOST: "0.0.0.0"
+  SERVER_PORT: "8080"
+  SERVER_READ_TIMEOUT: "15s"
+  SERVER_WRITE_TIMEOUT: "15s"
+  SERVER_IDLE_TIMEOUT: "60s"
+
+  # Logging
+  LOG_LEVEL: "info"
+  LOG_ENCODING: "json"
+  LOG_OUTPUT: "stdout"
+
+  # Security
+  CORS_ALLOWED_ORIGINS: "https://ecommerce.example.com"
+  CORS_ALLOWED_METHODS: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  CORS_ALLOWED_HEADERS: "Content-Type,Authorization,X-Request-ID"
+  RATE_LIMIT_PER_MINUTE: "100"
+
+  # JWT (non-secret parts)
+  JWT_ACCESS_TTL: "15m"
+  JWT_REFRESH_TTL: "168h"
+  JWT_ISSUER: "ecommerce-api"
+
+  # MongoDB (non-secret defaults; override URI in Secret if auth is needed)
+  MONGODB_DATABASE: "ecommerce"
+  MONGODB_MAX_POOL_SIZE: "100"
+  MONGODB_MIN_POOL_SIZE: "10"
+  MONGODB_CONNECT_TIMEOUT: "10s"
+
+  # NATS
+  NATS_CLUSTER_NAME: "ecommerce-cluster"
+  NATS_RECONNECT_WAIT: "2s"
+  NATS_MAX_RECONNECTS: "5"
+  NATS_CONNECT_TIMEOUT: "5s"
+
+  # Observability
+  OTEL_SERVICE_NAME: "ecommerce-api"
+  OTEL_ENABLED: "true"
+  OTEL_PROMETHEUS_PORT: "9090"

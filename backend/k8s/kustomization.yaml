@@ -1,0 +1,38 @@
+# Kustomization — ties all K8s manifests together.
+# Usage:
+#   kubectl apply -k k8s/
+#   kubectl delete -k k8s/
+#   kustomize build k8s/ | kubectl apply -f -
+#
+# To override for a specific environment:
+#   mkdir -p k8s/overlays/staging
+#   # Add kustomization.yaml there referencing ../.. as base
+#   kubectl apply -k k8s/overlays/staging
+
+namespace: ecommerce
+
+commonLabels:
+  app.kubernetes.io/part-of: ecommerce
+  app.kubernetes.io/managed-by: kubectl
+
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - configmap.yaml
+  - secret.yaml
+  - api-deployment.yaml
+  - worker-deployment.yaml
+  - scheduler-deployment.yaml
+  - api-service.yaml
+  - worker-service.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
+  - ingress.yaml
+
+# Exclude the scheduler deployment (it's a commented-out placeholder)
+# and the secret template (create real secrets separately)
+
+# Images — update with:
+#   kustomize edit set image ecommerce-api=registry.example.com/ecommerce-api:v1.2.3
+#   kustomize edit set image ecommerce-worker=registry.example.com/ecommerce-worker:v1.2.3

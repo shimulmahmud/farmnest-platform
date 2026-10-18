@@ -1,0 +1,55 @@
+# Version control
+.git
+.gitignore
+
+# Build artifacts
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test artifacts
+coverage.out
+coverage.html
+tests/integration/
+tests/load/
+tests/infrastructure/
+results/
+
+# Documentation (not needed in image)
+docs/
+*.md
+!README.md
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment files (secrets must NOT be in the image)
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+docker-compose*.yaml
+.dockerignore
+
+# Load test results
+results/
+
+# Misc
+tmp/
+temp/
+*.log
+*.tar
+*.tar.xz
+*.zip
+.DS_Store
+Thumbs.db

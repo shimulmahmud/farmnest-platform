@@ -1,0 +1,1826 @@
+[
+  {
+    "status": "ACTIVE",
+    "name": "Galaxy Nova X 5G",
+    "slug": "galaxy-nova-x",
+    "description": "Flagship smartphone with a 6.7-inch AMOLED display, 108MP camera system and a 5000mAh battery.",
+    "short_description": "6.7\" AMOLED, 108MP camera, 5G",
+    "brand": "NovaTech",
+    "category_id": "{{cat_electronics}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "display": "6.7 inch AMOLED",
+      "battery": "5000mAh",
+      "warranty": "1 year"
+    },
+    "tags": [
+      "phone",
+      "smartphone",
+      "5g"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/galaxy-nova-x/800/800",
+        "alt": "Galaxy Nova X 5G",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "GN-NOVA-X-256-BLK",
+        "options": {
+          "color": "Midnight Black",
+          "storage": "256GB"
+        },
+        "price": 89990,
+        "cost_price": 72000,
+        "weight_g": 200,
+        "requires_shipping": true,
+        "compare_at_price": 99990,
+        "length_mm": 165,
+        "width_mm": 78,
+        "height_mm": 9
+      },
+      {
+        "sku": "GN-NOVA-X-512-BLK",
+        "options": {
+          "color": "Midnight Black",
+          "storage": "512GB"
+        },
+        "price": 104990,
+        "cost_price": 84000,
+        "weight_g": 200,
+        "requires_shipping": true,
+        "compare_at_price": 114990,
+        "length_mm": 165,
+        "width_mm": 78,
+        "height_mm": 9
+      }
+    ],
+    "seo": {
+      "title": "Galaxy Nova X 5G",
+      "description": "6.7\" AMOLED, 108MP camera, 5G",
+      "keywords": [
+        "phone",
+        "smartphone",
+        "5g"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "ProBook Ultra 15 Laptop",
+    "slug": "probook-ultra-15",
+    "description": "High-performance 15.6-inch laptop with 32GB RAM and fast SSD storage for professionals.",
+    "short_description": "15.6\" laptop, 32GB RAM, 512GB SSD",
+    "brand": "TechPro",
+    "category_id": "{{cat_electronics}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "processor": "Intel Core Ultra 7",
+      "ram": "32GB",
+      "screen": "15.6 inch",
+      "os": "Windows 11"
+    },
+    "tags": [
+      "laptop",
+      "computer",
+      "professional"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/probook-ultra-15/800/800",
+        "alt": "ProBook Ultra 15 Laptop",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "PB-U15-512-SLV",
+        "options": {
+          "color": "Silver",
+          "storage": "512GB"
+        },
+        "price": 149990,
+        "cost_price": 125000,
+        "weight_g": 1800,
+        "requires_shipping": true,
+        "compare_at_price": 164990,
+        "length_mm": 350,
+        "width_mm": 240,
+        "height_mm": 20
+      },
+      {
+        "sku": "PB-U15-1TB-GRY",
+        "options": {
+          "color": "Space Gray",
+          "storage": "1TB"
+        },
+        "price": 169990,
+        "cost_price": 142000,
+        "weight_g": 1800,
+        "requires_shipping": true,
+        "compare_at_price": 184990,
+        "length_mm": 350,
+        "width_mm": 240,
+        "height_mm": 20
+      }
+    ],
+    "seo": {
+      "title": "ProBook Ultra 15 Laptop",
+      "description": "15.6\" laptop, 32GB RAM, 512GB SSD",
+      "keywords": [
+        "laptop",
+        "computer",
+        "professional"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "SoundWave Pro ANC Headphones",
+    "slug": "soundwave-pro-anc",
+    "description": "Wireless over-ear headphones with active noise cancellation and 30-hour battery life.",
+    "short_description": "Over-ear ANC, 30hr battery",
+    "brand": "SoundWave",
+    "category_id": "{{cat_electronics}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "battery": "30 hours",
+      "connectivity": "Bluetooth 5.3"
+    },
+    "tags": [
+      "headphones",
+      "audio",
+      "wireless",
+      "anc"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/soundwave-pro-anc/800/800",
+        "alt": "SoundWave Pro ANC Headphones",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "SW-PRO-ANC-BLK",
+        "options": {
+          "color": "Matte Black"
+        },
+        "price": 24990,
+        "cost_price": 15000,
+        "weight_g": 250,
+        "requires_shipping": true,
+        "compare_at_price": 29990
+      },
+      {
+        "sku": "SW-PRO-ANC-WHT",
+        "options": {
+          "color": "Cream White"
+        },
+        "price": 24990,
+        "cost_price": 15000,
+        "weight_g": 250,
+        "requires_shipping": true,
+        "compare_at_price": 29990
+      }
+    ],
+    "seo": {
+      "title": "SoundWave Pro ANC Headphones",
+      "description": "Over-ear ANC, 30hr battery",
+      "keywords": [
+        "headphones",
+        "audio",
+        "wireless",
+        "anc"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "VoltMax 20000mAh Power Bank",
+    "slug": "powerbank-20000",
+    "description": "Slim 20000mAh power bank with USB-C PD and dual USB-A outputs.",
+    "short_description": "20000mAh, 22.5W fast charge",
+    "brand": "VoltMax",
+    "category_id": "{{cat_electronics}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "capacity": "20000mAh",
+      "output": "22.5W"
+    },
+    "tags": [
+      "powerbank",
+      "charger",
+      "accessory"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/powerbank-20000/800/800",
+        "alt": "VoltMax 20000mAh Power Bank",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "VM-PB-20K-BLK",
+        "options": {
+          "color": "Black"
+        },
+        "price": 3290,
+        "cost_price": 2100,
+        "weight_g": 430,
+        "requires_shipping": true,
+        "compare_at_price": 3990
+      },
+      {
+        "sku": "VM-PB-20K-WHT",
+        "options": {
+          "color": "White"
+        },
+        "price": 3290,
+        "cost_price": 2100,
+        "weight_g": 430,
+        "requires_shipping": true,
+        "compare_at_price": 3990
+      }
+    ],
+    "seo": {
+      "title": "VoltMax 20000mAh Power Bank",
+      "description": "20000mAh, 22.5W fast charge",
+      "keywords": [
+        "powerbank",
+        "charger",
+        "accessory"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Chrono Titanium Smart Watch",
+    "slug": "chrono-titanium-watch",
+    "description": "Titanium smartwatch with always-on AMOLED display, GPS and health monitoring.",
+    "short_description": "AMOLED, GPS, 7-day battery",
+    "brand": "Chrono",
+    "category_id": "{{cat_electronics}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "case": "Grade-5 titanium",
+      "water_resistance": "100m"
+    },
+    "tags": [
+      "watch",
+      "smartwatch",
+      "gps"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/chrono-titanium-watch/800/800",
+        "alt": "Chrono Titanium Smart Watch",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "CH-TIT-40",
+        "options": {
+          "case_size": "40mm",
+          "band": "Leather"
+        },
+        "price": 39990,
+        "cost_price": 27000,
+        "weight_g": 55,
+        "requires_shipping": true,
+        "compare_at_price": 44990
+      },
+      {
+        "sku": "CH-TIT-44",
+        "options": {
+          "case_size": "44mm",
+          "band": "Titanium"
+        },
+        "price": 42990,
+        "cost_price": 29000,
+        "weight_g": 65,
+        "requires_shipping": true,
+        "compare_at_price": 47990
+      }
+    ],
+    "seo": {
+      "title": "Chrono Titanium Smart Watch",
+      "description": "AMOLED, GPS, 7-day battery",
+      "keywords": [
+        "watch",
+        "smartwatch",
+        "gps"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Classic Cotton Crew Tee",
+    "slug": "classic-cotton-tee",
+    "description": "Soft pre-shrunk cotton crew neck t-shirt for everyday wear.",
+    "short_description": "100% cotton, relaxed fit",
+    "brand": "BasicsCo",
+    "category_id": "{{cat_fashion}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "fabric": "100% cotton",
+      "fit": "Relaxed"
+    },
+    "tags": [
+      "tshirt",
+      "cotton",
+      "casual"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/classic-cotton-tee/800/800",
+        "alt": "Classic Cotton Crew Tee",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "BC-CCT-WHT-M",
+        "options": {
+          "color": "White",
+          "size": "M"
+        },
+        "price": 699,
+        "cost_price": 300,
+        "weight_g": 200,
+        "requires_shipping": true
+      },
+      {
+        "sku": "BC-CCT-WHT-L",
+        "options": {
+          "color": "White",
+          "size": "L"
+        },
+        "price": 699,
+        "cost_price": 300,
+        "weight_g": 220,
+        "requires_shipping": true
+      },
+      {
+        "sku": "BC-CCT-BLK-M",
+        "options": {
+          "color": "Black",
+          "size": "M"
+        },
+        "price": 699,
+        "cost_price": 300,
+        "weight_g": 200,
+        "requires_shipping": true
+      },
+      {
+        "sku": "BC-CCT-BLK-L",
+        "options": {
+          "color": "Black",
+          "size": "L"
+        },
+        "price": 699,
+        "cost_price": 300,
+        "weight_g": 220,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Classic Cotton Crew Tee",
+      "description": "100% cotton, relaxed fit",
+      "keywords": [
+        "tshirt",
+        "cotton",
+        "casual"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Slim Fit Stretch Denim Jeans",
+    "slug": "slim-fit-denim",
+    "description": "Slim-fit stretch denim jeans with a modern tapered leg.",
+    "short_description": "Slim fit, stretch denim, indigo",
+    "brand": "DenimLab",
+    "category_id": "{{cat_fashion}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "fabric": "98% cotton, 2% elastane"
+    },
+    "tags": [
+      "jeans",
+      "denim",
+      "slim fit"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/slim-fit-denim/800/800",
+        "alt": "Slim Fit Stretch Denim Jeans",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "DL-SFD-IND-30",
+        "options": {
+          "color": "Indigo",
+          "size": "30"
+        },
+        "price": 2490,
+        "cost_price": 1200,
+        "weight_g": 450,
+        "requires_shipping": true,
+        "compare_at_price": 2990
+      },
+      {
+        "sku": "DL-SFD-IND-32",
+        "options": {
+          "color": "Indigo",
+          "size": "32"
+        },
+        "price": 2490,
+        "cost_price": 1200,
+        "weight_g": 480,
+        "requires_shipping": true,
+        "compare_at_price": 2990
+      },
+      {
+        "sku": "DL-SFD-IND-34",
+        "options": {
+          "color": "Indigo",
+          "size": "34"
+        },
+        "price": 2490,
+        "cost_price": 1200,
+        "weight_g": 500,
+        "requires_shipping": true,
+        "compare_at_price": 2990
+      }
+    ],
+    "seo": {
+      "title": "Slim Fit Stretch Denim Jeans",
+      "description": "Slim fit, stretch denim, indigo",
+      "keywords": [
+        "jeans",
+        "denim",
+        "slim fit"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Embroidered Cotton Panjabi",
+    "slug": "cotton-panjabi",
+    "description": "Comfortable cotton panjabi with chest embroidery, ideal for Eid and weddings.",
+    "short_description": "Festive cotton panjabi",
+    "brand": "Aarong Style",
+    "category_id": "{{cat_fashion}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "fabric": "Cotton",
+      "care": "Machine wash cold"
+    },
+    "tags": [
+      "panjabi",
+      "festive",
+      "men"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/cotton-panjabi/800/800",
+        "alt": "Embroidered Cotton Panjabi",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "AS-PNJ-WHT-M",
+        "options": {
+          "color": "Off White",
+          "size": "M"
+        },
+        "price": 2990,
+        "cost_price": 1500,
+        "weight_g": 380,
+        "requires_shipping": true,
+        "compare_at_price": 3490
+      },
+      {
+        "sku": "AS-PNJ-WHT-L",
+        "options": {
+          "color": "Off White",
+          "size": "L"
+        },
+        "price": 2990,
+        "cost_price": 1500,
+        "weight_g": 400,
+        "requires_shipping": true,
+        "compare_at_price": 3490
+      },
+      {
+        "sku": "AS-PNJ-NVY-L",
+        "options": {
+          "color": "Navy",
+          "size": "L"
+        },
+        "price": 3190,
+        "cost_price": 1600,
+        "weight_g": 400,
+        "requires_shipping": true,
+        "compare_at_price": 3690
+      }
+    ],
+    "seo": {
+      "title": "Embroidered Cotton Panjabi",
+      "description": "Festive cotton panjabi",
+      "keywords": [
+        "panjabi",
+        "festive",
+        "men"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Everyday Canvas Sneakers",
+    "slug": "canvas-sneakers",
+    "description": "Breathable canvas sneakers with cushioned insole.",
+    "short_description": "Lightweight canvas sneakers",
+    "brand": "StepUp",
+    "category_id": "{{cat_fashion}}",
+    "unit": "pair",
+    "currency": "BDT",
+    "specs": {
+      "upper": "Canvas",
+      "sole": "Rubber"
+    },
+    "tags": [
+      "shoes",
+      "sneakers",
+      "casual"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/canvas-sneakers/800/800",
+        "alt": "Everyday Canvas Sneakers",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "SU-CNV-WHT-41",
+        "options": {
+          "color": "White",
+          "size": "41"
+        },
+        "price": 1890,
+        "cost_price": 950,
+        "weight_g": 700,
+        "requires_shipping": true
+      },
+      {
+        "sku": "SU-CNV-WHT-42",
+        "options": {
+          "color": "White",
+          "size": "42"
+        },
+        "price": 1890,
+        "cost_price": 950,
+        "weight_g": 720,
+        "requires_shipping": true
+      },
+      {
+        "sku": "SU-CNV-BLK-42",
+        "options": {
+          "color": "Black",
+          "size": "42"
+        },
+        "price": 1890,
+        "cost_price": 950,
+        "weight_g": 720,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Everyday Canvas Sneakers",
+      "description": "Lightweight canvas sneakers",
+      "keywords": [
+        "shoes",
+        "sneakers",
+        "casual"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Smart Rice Cooker 1.8L",
+    "slug": "rice-cooker-18l",
+    "description": "Electric rice cooker with non-stick inner pot and automatic keep-warm.",
+    "short_description": "1.8L, keep-warm, non-stick",
+    "brand": "HomeChef",
+    "category_id": "{{cat_home_living}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "capacity": "1.8L",
+      "power": "700W",
+      "warranty": "1 year"
+    },
+    "tags": [
+      "kitchen",
+      "rice cooker",
+      "appliance"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/rice-cooker-18l/800/800",
+        "alt": "Smart Rice Cooker 1.8L",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "HC-RC-18-WHT",
+        "options": {
+          "color": "White"
+        },
+        "price": 3990,
+        "cost_price": 2600,
+        "weight_g": 2800,
+        "requires_shipping": true,
+        "compare_at_price": 4590,
+        "length_mm": 300,
+        "width_mm": 300,
+        "height_mm": 260
+      }
+    ],
+    "seo": {
+      "title": "Smart Rice Cooker 1.8L",
+      "description": "1.8L, keep-warm, non-stick",
+      "keywords": [
+        "kitchen",
+        "rice cooker",
+        "appliance"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Nordic Arc Floor Lamp",
+    "slug": "nordic-arc-lamp",
+    "description": "Minimalist arc floor lamp with linen drum shade and foot dimmer.",
+    "short_description": "Brushed brass arc, linen shade",
+    "brand": "LumiHome",
+    "category_id": "{{cat_home_living}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "bulb": "E27",
+      "material": "Brass"
+    },
+    "tags": [
+      "lamp",
+      "lighting",
+      "nordic"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/nordic-arc-lamp/800/800",
+        "alt": "Nordic Arc Floor Lamp",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "LH-NAF-BRS",
+        "options": {
+          "finish": "Brushed Brass"
+        },
+        "price": 8990,
+        "cost_price": 5200,
+        "weight_g": 5500,
+        "requires_shipping": true,
+        "compare_at_price": 10990,
+        "length_mm": 350,
+        "width_mm": 240,
+        "height_mm": 1800
+      },
+      {
+        "sku": "LH-NAF-BLK",
+        "options": {
+          "finish": "Matte Black"
+        },
+        "price": 8490,
+        "cost_price": 4900,
+        "weight_g": 5500,
+        "requires_shipping": true,
+        "compare_at_price": 10490,
+        "length_mm": 350,
+        "width_mm": 240,
+        "height_mm": 1800
+      }
+    ],
+    "seo": {
+      "title": "Nordic Arc Floor Lamp",
+      "description": "Brushed brass arc, linen shade",
+      "keywords": [
+        "lamp",
+        "lighting",
+        "nordic"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Insulated Steel Water Bottle",
+    "slug": "steel-water-bottle",
+    "description": "Double-wall vacuum insulated stainless steel bottle.",
+    "short_description": "Keeps cold 24h, hot 12h",
+    "brand": "HydroMate",
+    "category_id": "{{cat_home_living}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "material": "304 stainless steel"
+    },
+    "tags": [
+      "bottle",
+      "steel",
+      "insulated"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/steel-water-bottle/800/800",
+        "alt": "Insulated Steel Water Bottle",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "HM-ISB-750-BLU",
+        "options": {
+          "color": "Blue",
+          "capacity": "750ml"
+        },
+        "price": 1190,
+        "cost_price": 600,
+        "weight_g": 380,
+        "requires_shipping": true
+      },
+      {
+        "sku": "HM-ISB-1000-BLK",
+        "options": {
+          "color": "Black",
+          "capacity": "1L"
+        },
+        "price": 1390,
+        "cost_price": 700,
+        "weight_g": 450,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Insulated Steel Water Bottle",
+      "description": "Keeps cold 24h, hot 12h",
+      "keywords": [
+        "bottle",
+        "steel",
+        "insulated"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Rajshahi Himsagar Mango",
+    "slug": "himsagar-mango",
+    "description": "Hand-picked Himsagar mangoes from Rajshahi, naturally ripened and formalin-free.",
+    "short_description": "Chemical-free Himsagar, sweet and fiberless",
+    "brand": "Rajshahi Orchards",
+    "category_id": "{{cat_fresh_produce}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Rajshahi",
+      "grade": "A",
+      "shelf_life_days": "5"
+    },
+    "tags": [
+      "mango",
+      "fruit",
+      "seasonal",
+      "rajshahi"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/himsagar-mango/800/800",
+        "alt": "Rajshahi Himsagar Mango",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "RO-HIM-2KG",
+        "options": {
+          "pack": "2kg"
+        },
+        "price": 460,
+        "cost_price": 300,
+        "weight_g": 2000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "RO-HIM-5KG",
+        "options": {
+          "pack": "5kg"
+        },
+        "price": 1100,
+        "cost_price": 720,
+        "weight_g": 5000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "RO-HIM-10KG",
+        "options": {
+          "pack": "10kg"
+        },
+        "price": 2100,
+        "cost_price": 1400,
+        "weight_g": 10000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Rajshahi Himsagar Mango",
+      "description": "Chemical-free Himsagar, sweet and fiberless",
+      "keywords": [
+        "mango",
+        "fruit",
+        "seasonal",
+        "rajshahi"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Fresh Country Tomato",
+    "slug": "fresh-tomato",
+    "description": "Firm, ripe country tomatoes harvested within 24 hours of dispatch.",
+    "short_description": "Farm-fresh, pesticide-safe tomatoes",
+    "brand": "Bogura Farms",
+    "category_id": "{{cat_fresh_produce}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Bogura",
+      "grade": "A"
+    },
+    "tags": [
+      "vegetable",
+      "tomato",
+      "fresh"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/fresh-tomato/800/800",
+        "alt": "Fresh Country Tomato",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "BF-TOM-1KG",
+        "options": {
+          "pack": "1kg"
+        },
+        "price": 80,
+        "cost_price": 50,
+        "weight_g": 1000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "BF-TOM-5KG",
+        "options": {
+          "pack": "5kg"
+        },
+        "price": 380,
+        "cost_price": 240,
+        "weight_g": 5000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Fresh Country Tomato",
+      "description": "Farm-fresh, pesticide-safe tomatoes",
+      "keywords": [
+        "vegetable",
+        "tomato",
+        "fresh"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Desi Red Potato",
+    "slug": "red-potato",
+    "description": "Firm red potatoes from Munshiganj, ideal for curry and frying.",
+    "short_description": "Cold-stored red potato",
+    "brand": "Munshiganj Growers",
+    "category_id": "{{cat_fresh_produce}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Munshiganj"
+    },
+    "tags": [
+      "vegetable",
+      "potato"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/red-potato/800/800",
+        "alt": "Desi Red Potato",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "MG-POT-2KG",
+        "options": {
+          "pack": "2kg"
+        },
+        "price": 110,
+        "cost_price": 70,
+        "weight_g": 2000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "MG-POT-10KG",
+        "options": {
+          "pack": "10kg"
+        },
+        "price": 520,
+        "cost_price": 340,
+        "weight_g": 10000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Desi Red Potato",
+      "description": "Cold-stored red potato",
+      "keywords": [
+        "vegetable",
+        "potato"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Fresh Green Chili",
+    "slug": "green-chili",
+    "description": "Fresh, hot green chilies picked and packed on the same day.",
+    "short_description": "Spicy green chili",
+    "brand": "Jashore Greens",
+    "category_id": "{{cat_fresh_produce}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Jashore",
+      "heat": "High"
+    },
+    "tags": [
+      "vegetable",
+      "chili",
+      "spice"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/green-chili/800/800",
+        "alt": "Fresh Green Chili",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "JG-CHL-250G",
+        "options": {
+          "pack": "250g"
+        },
+        "price": 40,
+        "cost_price": 24,
+        "weight_g": 250,
+        "requires_shipping": true
+      },
+      {
+        "sku": "JG-CHL-1KG",
+        "options": {
+          "pack": "1kg"
+        },
+        "price": 150,
+        "cost_price": 95,
+        "weight_g": 1000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Fresh Green Chili",
+      "description": "Spicy green chili",
+      "keywords": [
+        "vegetable",
+        "chili",
+        "spice"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Farm Fresh Desi Eggs",
+    "slug": "farm-eggs-dozen",
+    "description": "Free-range desi eggs, packed in protective trays.",
+    "short_description": "Free-range desi eggs",
+    "brand": "Savar Poultry",
+    "category_id": "{{cat_fresh_produce}}",
+    "unit": "dozen",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Savar",
+      "type": "Free-range"
+    },
+    "tags": [
+      "eggs",
+      "protein",
+      "fresh"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/farm-eggs-dozen/800/800",
+        "alt": "Farm Fresh Desi Eggs",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "SP-EGG-12",
+        "options": {
+          "pack": "12 pcs"
+        },
+        "price": 240,
+        "cost_price": 170,
+        "weight_g": 900,
+        "requires_shipping": true
+      },
+      {
+        "sku": "SP-EGG-30",
+        "options": {
+          "pack": "30 pcs"
+        },
+        "price": 580,
+        "cost_price": 410,
+        "weight_g": 2200,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Farm Fresh Desi Eggs",
+      "description": "Free-range desi eggs",
+      "keywords": [
+        "eggs",
+        "protein",
+        "fresh"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Premium Miniket Rice",
+    "slug": "miniket-rice",
+    "description": "Premium miniket rice from Dinajpur, aged and polish-free.",
+    "short_description": "Polish-free, aromatic miniket",
+    "brand": "Dinajpur Mills",
+    "category_id": "{{cat_grains_staples}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Dinajpur",
+      "type": "Miniket"
+    },
+    "tags": [
+      "rice",
+      "staple",
+      "miniket"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/miniket-rice/800/800",
+        "alt": "Premium Miniket Rice",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "DM-MNK-5KG",
+        "options": {
+          "pack": "5kg"
+        },
+        "price": 430,
+        "cost_price": 330,
+        "weight_g": 5000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "DM-MNK-25KG",
+        "options": {
+          "pack": "25kg"
+        },
+        "price": 2050,
+        "cost_price": 1600,
+        "weight_g": 25000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Premium Miniket Rice",
+      "description": "Polish-free, aromatic miniket",
+      "keywords": [
+        "rice",
+        "staple",
+        "miniket"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Cold-Pressed Mustard Oil",
+    "slug": "mustard-oil",
+    "description": "Pure mustard oil pressed in traditional wooden ghani, no additives.",
+    "short_description": "Traditional kolhu-pressed mustard oil",
+    "brand": "Pabna Ghani",
+    "category_id": "{{cat_grains_staples}}",
+    "unit": "litre",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Pabna",
+      "process": "Cold-pressed"
+    },
+    "tags": [
+      "oil",
+      "mustard",
+      "cooking"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/mustard-oil/800/800",
+        "alt": "Cold-Pressed Mustard Oil",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "PG-MO-1L",
+        "options": {
+          "pack": "1L"
+        },
+        "price": 320,
+        "cost_price": 240,
+        "weight_g": 920,
+        "requires_shipping": true
+      },
+      {
+        "sku": "PG-MO-5L",
+        "options": {
+          "pack": "5L"
+        },
+        "price": 1550,
+        "cost_price": 1180,
+        "weight_g": 4600,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Cold-Pressed Mustard Oil",
+      "description": "Traditional kolhu-pressed mustard oil",
+      "keywords": [
+        "oil",
+        "mustard",
+        "cooking"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Desi Masur Dal",
+    "slug": "masur-dal",
+    "description": "Unpolished red lentils, cleaned and sorted for quick cooking.",
+    "short_description": "Cleaned, unpolished red lentils",
+    "brand": "Pabna Pulses",
+    "category_id": "{{cat_grains_staples}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Pabna"
+    },
+    "tags": [
+      "lentil",
+      "dal",
+      "pulse"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/masur-dal/800/800",
+        "alt": "Desi Masur Dal",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "PP-MSR-1KG",
+        "options": {
+          "pack": "1kg"
+        },
+        "price": 150,
+        "cost_price": 110,
+        "weight_g": 1000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "PP-MSR-5KG",
+        "options": {
+          "pack": "5kg"
+        },
+        "price": 720,
+        "cost_price": 540,
+        "weight_g": 5000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Desi Masur Dal",
+      "description": "Cleaned, unpolished red lentils",
+      "keywords": [
+        "lentil",
+        "dal",
+        "pulse"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Sundarban Wild Honey",
+    "slug": "sundarban-honey",
+    "description": "Raw wild honey collected from the Sundarbans, unprocessed.",
+    "short_description": "Raw wild honey, no sugar added",
+    "brand": "Khalisha Honey",
+    "category_id": "{{cat_grains_staples}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Sundarbans",
+      "type": "Raw"
+    },
+    "tags": [
+      "honey",
+      "natural",
+      "sundarban"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/sundarban-honey/800/800",
+        "alt": "Sundarban Wild Honey",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "KH-HNY-500G",
+        "options": {
+          "pack": "500g"
+        },
+        "price": 650,
+        "cost_price": 470,
+        "weight_g": 650,
+        "requires_shipping": true
+      },
+      {
+        "sku": "KH-HNY-1KG",
+        "options": {
+          "pack": "1kg"
+        },
+        "price": 1250,
+        "cost_price": 900,
+        "weight_g": 1250,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Sundarban Wild Honey",
+      "description": "Raw wild honey, no sugar added",
+      "keywords": [
+        "honey",
+        "natural",
+        "sundarban"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Chattogram Dried Shutki",
+    "slug": "ctg-dried-fish",
+    "description": "Hygienically sun-dried shutki, vacuum packed.",
+    "short_description": "Sun-dried loitta shutki",
+    "brand": "Coastal Foods",
+    "category_id": "{{cat_grains_staples}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "origin": "Chattogram"
+    },
+    "tags": [
+      "dried fish",
+      "shutki",
+      "coastal"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/ctg-dried-fish/800/800",
+        "alt": "Chattogram Dried Shutki",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "CF-SHT-250G",
+        "options": {
+          "pack": "250g"
+        },
+        "price": 380,
+        "cost_price": 260,
+        "weight_g": 300,
+        "requires_shipping": true
+      },
+      {
+        "sku": "CF-SHT-500G",
+        "options": {
+          "pack": "500g"
+        },
+        "price": 720,
+        "cost_price": 500,
+        "weight_g": 550,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Chattogram Dried Shutki",
+      "description": "Sun-dried loitta shutki",
+      "keywords": [
+        "dried fish",
+        "shutki",
+        "coastal"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Hybrid Boro Rice Seed",
+    "slug": "hybrid-rice-seed",
+    "description": "Certified high-yield hybrid rice seed suited for boro season.",
+    "short_description": "High-yield hybrid boro seed",
+    "brand": "BRRI Select",
+    "category_id": "{{cat_farm_inputs}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "season": "Boro",
+      "germination": "90%+"
+    },
+    "tags": [
+      "seed",
+      "rice",
+      "hybrid"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/hybrid-rice-seed/800/800",
+        "alt": "Hybrid Boro Rice Seed",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "BS-HRS-1KG",
+        "options": {
+          "pack": "1kg"
+        },
+        "price": 450,
+        "cost_price": 340,
+        "weight_g": 1000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "BS-HRS-5KG",
+        "options": {
+          "pack": "5kg"
+        },
+        "price": 2100,
+        "cost_price": 1600,
+        "weight_g": 5000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Hybrid Boro Rice Seed",
+      "description": "High-yield hybrid boro seed",
+      "keywords": [
+        "seed",
+        "rice",
+        "hybrid"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Organic Vermicompost",
+    "slug": "organic-compost",
+    "description": "Vermicompost made from cow dung and kitchen waste, odour-free.",
+    "short_description": "Nutrient-rich organic compost",
+    "brand": "GreenSoil",
+    "category_id": "{{cat_farm_inputs}}",
+    "unit": "kg",
+    "currency": "BDT",
+    "specs": {
+      "npk": "2-1-1",
+      "type": "Organic"
+    },
+    "tags": [
+      "fertilizer",
+      "organic",
+      "compost"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/organic-compost/800/800",
+        "alt": "Organic Vermicompost",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "GS-VCP-5KG",
+        "options": {
+          "pack": "5kg"
+        },
+        "price": 320,
+        "cost_price": 220,
+        "weight_g": 5000,
+        "requires_shipping": true
+      },
+      {
+        "sku": "GS-VCP-25KG",
+        "options": {
+          "pack": "25kg"
+        },
+        "price": 1450,
+        "cost_price": 1050,
+        "weight_g": 25000,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Organic Vermicompost",
+      "description": "Nutrient-rich organic compost",
+      "keywords": [
+        "fertilizer",
+        "organic",
+        "compost"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Drip Irrigation Starter Kit",
+    "slug": "drip-irrigation-kit",
+    "description": "Complete drip kit with tubing, drippers and connectors for small plots.",
+    "short_description": "Covers up to 100 plants",
+    "brand": "AquaFarm",
+    "category_id": "{{cat_farm_inputs}}",
+    "unit": "kit",
+    "currency": "BDT",
+    "specs": {
+      "coverage": "100 plants",
+      "tubing": "50m"
+    },
+    "tags": [
+      "irrigation",
+      "drip",
+      "farm"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/drip-irrigation-kit/800/800",
+        "alt": "Drip Irrigation Starter Kit",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "AF-DRP-100",
+        "options": {
+          "coverage": "100 plants"
+        },
+        "price": 2890,
+        "cost_price": 2000,
+        "weight_g": 3200,
+        "requires_shipping": true,
+        "compare_at_price": 3390
+      },
+      {
+        "sku": "AF-DRP-500",
+        "options": {
+          "coverage": "500 plants"
+        },
+        "price": 11900,
+        "cost_price": 8800,
+        "weight_g": 14500,
+        "requires_shipping": true,
+        "compare_at_price": 13500
+      }
+    ],
+    "seo": {
+      "title": "Drip Irrigation Starter Kit",
+      "description": "Covers up to 100 plants",
+      "keywords": [
+        "irrigation",
+        "drip",
+        "farm"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Knapsack Sprayer 16L",
+    "slug": "knapsack-sprayer-16l",
+    "description": "Durable 16-litre knapsack sprayer with adjustable nozzle.",
+    "short_description": "Manual 16L pesticide/water sprayer",
+    "brand": "AgroPro",
+    "category_id": "{{cat_farm_inputs}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "capacity": "16L",
+      "type": "Manual"
+    },
+    "tags": [
+      "sprayer",
+      "tool",
+      "farm"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/knapsack-sprayer-16l/800/800",
+        "alt": "Knapsack Sprayer 16L",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "AP-SPR-16L",
+        "options": {
+          "capacity": "16L"
+        },
+        "price": 2250,
+        "cost_price": 1600,
+        "weight_g": 3500,
+        "requires_shipping": true,
+        "compare_at_price": 2590
+      }
+    ],
+    "seo": {
+      "title": "Knapsack Sprayer 16L",
+      "description": "Manual 16L pesticide/water sprayer",
+      "keywords": [
+        "sprayer",
+        "tool",
+        "farm"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Garden Hand Tool Set (5 pcs)",
+    "slug": "garden-tool-set",
+    "description": "Five-piece steel garden tool set with ergonomic grips.",
+    "short_description": "Trowel, fork, pruner and more",
+    "brand": "AgroPro",
+    "category_id": "{{cat_farm_inputs}}",
+    "unit": "set",
+    "currency": "BDT",
+    "specs": {
+      "pieces": "5",
+      "material": "Carbon steel"
+    },
+    "tags": [
+      "tools",
+      "garden",
+      "farm"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/garden-tool-set/800/800",
+        "alt": "Garden Hand Tool Set (5 pcs)",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "AP-GTS-5",
+        "options": {
+          "set": "5 pcs"
+        },
+        "price": 1290,
+        "cost_price": 850,
+        "weight_g": 1400,
+        "requires_shipping": true,
+        "compare_at_price": 1590
+      }
+    ],
+    "seo": {
+      "title": "Garden Hand Tool Set (5 pcs)",
+      "description": "Trowel, fork, pruner and more",
+      "keywords": [
+        "tools",
+        "garden",
+        "farm"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Herbal Neem Soap",
+    "slug": "neem-soap",
+    "description": "Handmade herbal soap with neem and tulsi, free from parabens.",
+    "short_description": "Antibacterial neem & tulsi soap",
+    "brand": "Prokriti",
+    "category_id": "{{cat_beauty_care}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "weight": "100g",
+      "type": "Handmade"
+    },
+    "tags": [
+      "soap",
+      "herbal",
+      "neem"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/neem-soap/800/800",
+        "alt": "Herbal Neem Soap",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "PK-NMS-1",
+        "options": {
+          "pack": "1 bar"
+        },
+        "price": 90,
+        "cost_price": 50,
+        "weight_g": 110,
+        "requires_shipping": true
+      },
+      {
+        "sku": "PK-NMS-4",
+        "options": {
+          "pack": "4 bars"
+        },
+        "price": 330,
+        "cost_price": 190,
+        "weight_g": 440,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Herbal Neem Soap",
+      "description": "Antibacterial neem & tulsi soap",
+      "keywords": [
+        "soap",
+        "herbal",
+        "neem"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Pure Coconut Hair Oil",
+    "slug": "coconut-hair-oil",
+    "description": "Pure cold-pressed coconut oil for hair and skin.",
+    "short_description": "Cold-pressed coconut oil",
+    "brand": "Prokriti",
+    "category_id": "{{cat_beauty_care}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "process": "Cold-pressed"
+    },
+    "tags": [
+      "oil",
+      "hair",
+      "coconut"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/coconut-hair-oil/800/800",
+        "alt": "Pure Coconut Hair Oil",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "PK-CHO-200",
+        "options": {
+          "size": "200ml"
+        },
+        "price": 290,
+        "cost_price": 190,
+        "weight_g": 230,
+        "requires_shipping": true
+      },
+      {
+        "sku": "PK-CHO-500",
+        "options": {
+          "size": "500ml"
+        },
+        "price": 640,
+        "cost_price": 430,
+        "weight_g": 560,
+        "requires_shipping": true
+      }
+    ],
+    "seo": {
+      "title": "Pure Coconut Hair Oil",
+      "description": "Cold-pressed coconut oil",
+      "keywords": [
+        "oil",
+        "hair",
+        "coconut"
+      ]
+    }
+  },
+  {
+    "status": "ACTIVE",
+    "name": "Charcoal Face Wash",
+    "slug": "charcoal-face-wash",
+    "description": "Activated charcoal face wash that removes oil and impurities.",
+    "short_description": "Deep cleansing, oil control",
+    "brand": "ClearSkin",
+    "category_id": "{{cat_beauty_care}}",
+    "unit": "piece",
+    "currency": "BDT",
+    "specs": {
+      "skin_type": "Oily"
+    },
+    "tags": [
+      "facewash",
+      "skincare"
+    ],
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/charcoal-face-wash/800/800",
+        "alt": "Charcoal Face Wash",
+        "sort_order": 1
+      }
+    ],
+    "variants": [
+      {
+        "sku": "CS-CFW-100",
+        "options": {
+          "size": "100ml"
+        },
+        "price": 420,
+        "cost_price": 260,
+        "weight_g": 130,
+        "requires_shipping": true,
+        "compare_at_price": 490
+      }
+    ],
+    "seo": {
+      "title": "Charcoal Face Wash",
+      "description": "Deep cleansing, oil control",
+      "keywords": [
+        "facewash",
+        "skincare"
+      ]
+    }
+  }
+]
