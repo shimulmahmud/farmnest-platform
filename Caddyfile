@@ -1,0 +1,20 @@
+# HTTPS for the live shop (used by docker-compose.prod.yml).
+# Caddy gets and renews free Let's Encrypt certificates by itself. It only needs:
+#   - your two domain names pointing at this server (DNS "A" records), and
+#   - ports 80 and 443 open.
+{
+	email {$ACME_EMAIL}
+}
+
+{$SHOP_DOMAIN} {
+	encode gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	reverse_proxy client:80
+}
+
+{$ADMIN_DOMAIN} {
+	encode gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy admin:80
+}

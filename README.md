@@ -1,7 +1,8 @@
 # FarmNest platform — backend + admin panel + storefront
 
 ```
-docker-compose.yml   starts everything (this file is the one to use)
+docker-compose.yml        try it on your own computer (demo data, Mailpit)
+docker-compose.prod.yml   the live server (HTTPS, no demo data, backups): see PRODUCTION.md
 backend/             Go API + worker (MongoDB, NATS, Mailpit)  -> http://localhost:8080
 frontend/admin/      Admin panel (React)                         -> http://localhost:5173
 frontend/client/     Customer storefront (React)                 -> http://localhost:5174
@@ -134,9 +135,16 @@ For a production build outside Docker set `VITE_API_URL=https://your-api/api/v1`
 - Rules: one conversation can be about an order (checked against the customer's own orders), up to 5 open
   conversations per customer, 2,000 characters per message. A customer writing again reopens a closed conversation.
 
+## Product pictures
+
+In **Admin -> Products -> Add / Edit** use **Upload picture** (JPG, PNG, WebP or GIF, up to 8 MB; several at once) for the
+product and for each option. Pictures are checked for real (a renamed file is rejected), get a random name, and are
+kept in a Docker volume so they survive restarts. You can still paste a link instead.
+
 ## Going live
 
-See `PRODUCTION.md` for the checklist (secrets, HTTPS, real email, backups, monitoring).
+`docker-compose.prod.yml` is the live-server version (HTTPS, private database, no demo data, daily backups).
+See `PRODUCTION.md` for the step-by-step quick start and the checklist.
 
 ## Not connected yet
 

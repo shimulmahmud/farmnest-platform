@@ -46,6 +46,10 @@ import (
 	supApp "github.com/ecommerce/backend/internal/support/application"
 	supInfra "github.com/ecommerce/backend/internal/support/infrastructure"
 	supTransport "github.com/ecommerce/backend/internal/support/transport"
+	uploadDomain "github.com/ecommerce/backend/internal/uploads/domain"
+	uploadApp "github.com/ecommerce/backend/internal/uploads/application"
+	uploadInfra "github.com/ecommerce/backend/internal/uploads/infrastructure"
+	uploadTransport "github.com/ecommerce/backend/internal/uploads/transport"
 	repInfra "github.com/ecommerce/backend/internal/reports/infrastructure"
 	repTransport "github.com/ecommerce/backend/internal/reports/transport"
 	purApp "github.com/ecommerce/backend/internal/purchases/application"
@@ -424,7 +428,7 @@ func main() {
                 ReadTimeout:  cfg.Server.ReadTimeout,
                 WriteTimeout: cfg.Server.WriteTimeout,
                 IdleTimeout:  cfg.Server.IdleTimeout,
-                BodyLimit:    1 * 1024 * 1024, // 1 MB max request body
+                BodyLimit:    12 * 1024 * 1024, // 12 MB max request body (picture uploads are checked separately, up to 8 MB)
                 ErrorHandler: defaultErrorHandler,
                 AppName:      "ecommerce-api",
         })
@@ -461,6 +465,23 @@ func main() {
         ordTransport.RegisterOrderRoutes(app, orderHandler, authMW, adminMW)
         purTransport.RegisterRoutes(app, purTransport.NewHandler(purchaseService), authMW, adminMW)
         repTransport.RegisterRoutes(app, repTransport.NewHandler(repInfra.NewRepository(db)), authMW, adminMW)
+
+        // --- Wire up picture uploads (product photos from the admin panel) ---
+        uploadDir := envOr("UPLOAD_DIR", "./uploads")
+        uploadStore, err := uploadInfra.NewLocalStore(uploadDir, "/uploads")
+        if err != nil {
+                log.Fatalw("failed to prepare the upload folder", "dir", uploadDir, "error", err)
+        }
+        uploadTransport.RegisterRoutes(app, uploadTransport.NewHandler(
+                uploadApp.NewService(uploadDomain.DefaultValidator(), uploadStore)), authMW, adminMW)
+        // Stored pictures are public, never change (random names) and must never run as a page or script.
+        app.Use("/uploads", func(c *fiber.Ctx) error {
+                c.Set("X-Content-Type-Options", "nosniff")
+                c.Set("Cache-Control", "public, max-age=31536000, immutable")
+                c.Set("Content-Security-Policy", "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'")
+                return c.Next()
+        })
+        app.Static("/uploads", uploadStore.Dir(), fiber.Static{Browse: false, MaxAge: 31536000})
 
         // --- Wire up support messaging ---
         supportService := supApp.NewService(supInfra.NewRepository(db), supInfra.NewUserLookup(db))

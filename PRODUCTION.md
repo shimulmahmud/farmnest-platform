@@ -1,65 +1,92 @@
-# Going live: checklist
+# Going live
 
-The demo setup (`docker compose up --build`) is meant for trying things out. Before real customers use the shop,
-work through this list. Items marked **MUST** are not optional.
+`docker compose up` (the plain `docker-compose.yml`) is for trying the shop on your own computer.
+For real customers use **`docker-compose.prod.yml`**. It already does the hard parts for you:
 
-## 1. Secrets and accounts (MUST)
-- [ ] **Do not load the demo data.** `backend/scripts/seed.js` creates demo admins with the password `Password123!`.
-      On a real server, start without the `seed` service, then create your own admin (or change every demo password
-      and delete the demo accounts) before the site is reachable.
-- [ ] Set a long random `JWT_SECRET` (and any other secret) in `backend/.env.docker` (or your host's secret store).
-      `.env` files must **never** be committed to git; add them to `.gitignore`.
-- [ ] Turn on MongoDB authentication (a username/password in the connection string) and do not publish port 27017.
-- [ ] Change the default `mailpit` setup (it catches emails instead of sending them): see section 3.
+- HTTPS with free, self-renewing certificates (Caddy)
+- a private database with a password (nothing but ports 80/443 is open to the internet)
+- **no demo data and no demo passwords**
+- real email through your provider (no Mailpit)
+- a daily backup of the database and your uploaded pictures
 
-## 2. HTTPS and addresses (MUST)
-- [ ] Put a reverse proxy with HTTPS in front (Caddy, Traefik, or nginx with Let's Encrypt).
-      Example: `shop.yourdomain.com` -> storefront, `admin.yourdomain.com` -> admin panel.
-- [ ] Set `APP_URL=https://shop.yourdomain.com` and `ADMIN_URL=https://admin.yourdomain.com` (buttons in emails use these).
-- [ ] Only the proxy should be reachable from the internet; keep MongoDB, NATS and the API port private.
-- [ ] Consider limiting the admin panel to your office/VPN IP, or adding a second login step.
+## Quick start on a server
 
-## 3. Email that really arrives (MUST)
-- [ ] Use a mail provider (Amazon SES, Brevo, SendGrid, Mailgun...) and set `SMTP_HOST`, `SMTP_PORT`,
-      `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` in `backend/.env.docker`.
-- [ ] Send from your own domain and add its **SPF, DKIM and DMARC** records, or emails land in spam.
-- [ ] Set `APP_NAME`, `BRAND_LOGO_URL` (full https:// address), `SUPPORT_EMAIL` so emails look like your shop.
-- [ ] Send yourself a sign-up email, a password reset, an order email and a support reply, in Gmail and one other mailbox.
+You need a Linux server (2 GB memory is enough to start) with Docker and Docker Compose, and two names
+(for example `shop.yourdomain.com` and `admin.yourdomain.com`) whose DNS **A records point at the server's IP**.
+Ports 80 and 443 must be open.
 
-## 4. Backups (MUST)
-- [ ] Back up MongoDB every day (for example `mongodump` to another machine or cloud storage) and keep 14+ days.
-- [ ] **Test a restore** on another machine. A backup you never restored is a guess.
-- [ ] Back up your uploaded/product images and the `.env` secrets (somewhere private).
+```bash
+# 1. Settings
+cp .env.production.example .env.production
+nano .env.production            # fill in every REQUIRED line (secrets: openssl rand -hex 32)
 
-## 5. Payments and orders
-- [ ] bKash/Nagad/Rocket: you confirm payments by hand. Write down who checks them, how often, and what happens when a
-      TrxID does not match (cancel the order and tell the customer).
-- [ ] Decide your cash-on-delivery rules: refused parcels, return shipping, who restocks.
-- [ ] Decide refund and return rules, and put them on the Terms/Refund pages.
-- [ ] Automatic gateway payments and card payments are not connected yet.
+# 2. Start everything (the first start builds the site and takes a few minutes)
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 
-## 6. Monitoring
-- [ ] Add an uptime check on `https://shop.../` and `https://shop.../health` (UptimeRobot, Better Stack...) with an alert to your phone.
-- [ ] Watch disk space (MongoDB and logs grow). Set log rotation.
-- [ ] Add error tracking (for example Sentry) so you hear about problems before customers do.
-- [ ] `docker compose logs -f api worker` is your first stop when something breaks.
+# 3. Create YOUR admin account (there is no demo account here)
+docker compose -f docker-compose.prod.yml --env-file .env.production run --rm \
+  --entrypoint /bin/createadmin \
+  -e ADMIN_EMAIL=you@yourdomain.com \
+  -e ADMIN_PASSWORD='a long password phrase of 12+ characters' \
+  -e ADMIN_FIRST_NAME=Your -e ADMIN_LAST_NAME=Name api
+```
 
-## 7. Content and images
-- [ ] Replace the placeholder product pictures. Products take image **addresses**; for your own photos use an image
-      host or CDN (Cloudinary, S3 + CloudFront...). A built-in upload button is a good next feature.
-- [ ] Read the About, Terms, Privacy pages and edit them for your business (get legal advice for your country).
-- [ ] Replace the logo, favicon and the "FarmNest" texts if you use another name.
+Then open `https://admin.yourdomain.com`, sign in, and look at **Products, Categories, Delivery charges
+(Shipping), Promotions**. Add your categories and products (use **Upload picture** for photos) and receive stock in
+**Purchases**. Your shop is at `https://shop.yourdomain.com`.
 
-## 8. Growing later
+Forgot your admin password? Run step 3 again with `-e ADMIN_RESET=1`.
+
+### Everyday commands
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production ps            # is everything running?
+docker compose -f docker-compose.prod.yml --env-file .env.production logs -f api    # watch the backend (also: worker, caddy)
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build  # update after changing code/settings
+docker compose -f docker-compose.prod.yml --env-file .env.production down           # stop (data is kept)
+```
+Never run `down -v` on the live shop: it deletes the database and the uploaded pictures.
+
+## Backups and restoring
+- A backup runs when the shop starts and then every 24 hours. Files go to the **`backups/`** folder next to
+  `docker-compose.prod.yml`: `db-<date>.gz` (database) and `uploads-<date>.tgz` (pictures). Files older than
+  `BACKUP_KEEP_DAYS` (default 14) are deleted.
+- **Copy `backups/` to another machine or cloud storage regularly.** A backup on the same server is lost with the server.
+- Restore the database (this replaces current data):
+  ```bash
+  docker compose -f docker-compose.prod.yml --env-file .env.production exec -T mongodb \
+    mongorestore -u "$MONGO_USER" -p "$MONGO_PASSWORD" --authenticationDatabase admin \
+    --archive --gzip --drop < backups/db-YYYYMMDD-HHMMSS.gz
+  ```
+- Restore pictures: `docker compose ... cp backups/uploads-....tgz api:/tmp/u.tgz`, then
+  `docker compose ... exec api tar xzf /tmp/u.tgz -C /data/uploads`.
+- **Practise a restore on a spare machine once.** A backup you never restored is a guess.
+
+## What is still up to you
+
+### Before opening the shop
+- [ ] **Email:** use a real provider and add **SPF, DKIM and DMARC** records on your domain, or emails land in spam.
+      Then send yourself a sign-up email, a password reset, an order email and a support reply.
+- [ ] **Wallet numbers:** set `PAYMENT_BKASH_NUMBER` etc. in `.env.production` (no number = wallet hidden).
+- [ ] **Delivery charges:** set them in Admin -> Shipping -> Delivery charges.
+- [ ] **Pictures, logo, texts:** upload real product photos; set `APP_NAME` and `BRAND_LOGO_URL`; edit the
+      About / Terms / Privacy / Refund pages for your business (get legal advice for your country).
+- [ ] **Do one full test order** as a customer: COD and wallet; ship, deliver, cancel one and check the stock came back.
+
+### Payments and orders
+- bKash/Nagad/Rocket are confirmed by you by hand. Decide who checks them, how often, and what happens when a TrxID
+  does not match (cancel and tell the customer).
+- Decide cash-on-delivery rules (refused parcels, return shipping) and refund rules, and publish them.
+- Automatic gateway and card payments are not connected yet.
+
+### Keeping it healthy
+- [ ] Add an uptime check on `https://shop.../health` (UptimeRobot, Better Stack...) that alerts your phone.
+- [ ] Watch disk space (database, pictures, backups, logs).
+- [ ] Add error tracking (for example Sentry) if you want to hear about problems before customers do.
+- [ ] Keep the server updated (`apt upgrade`), and rebuild the shop now and then for security updates.
+- [ ] Limit the admin address to your office/VPN if you can, and use long passwords for every staff account.
+
+### Good to know
 - The storefront loads the whole catalog at start. That is fine for a few hundred products; beyond that, switch the
   product list and search to server-side paging.
 - SMS and push notifications are still log-only (no real sending).
-- Reviews, coupons and support messaging are built; product view tracking and abandoned-cart tracking are not.
-- Keep dependencies updated (`go get -u`, `npm audit`) and rebuild regularly.
-
-## 9. Before the first real order
-1. Place a COD order and an online (wallet) order yourself. Ship, deliver and mark paid.
-2. Cancel one and check the stock came back.
-3. Review the Profit page and compare with your own numbers.
-4. Send a support message and answer it from the admin panel.
-5. Ask a friend to do the sign-up and reset-password flow on their phone.
+- Uploaded pictures live on this server's disk (a volume). For heavy traffic, move them to a CDN/S3 later.

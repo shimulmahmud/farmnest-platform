@@ -15,6 +15,7 @@ import {
 import { listCategories } from '../../../api/categories';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import ErrorMessage from '../../../components/common/ErrorMessage';
+import ImageUploadButton from '../../../components/common/ImageUploadButton';
 import type {
   CreateProductRequest,
   UpdateProductRequest,
@@ -555,14 +556,26 @@ export default function ProductFormPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="label-field mb-0">Product images (first one is the main image)</label>
-              <button type="button" onClick={() => setImages((p) => [...p, { url: '', alt: '' }])} className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-primary-600 hover:bg-primary-50">
-                <PlusIcon className="h-3 w-3" /> Add image
-              </button>
+              <div className="flex items-start gap-1">
+                <ImageUploadButton
+                  onUploaded={(urls) =>
+                    setImages((p) => [...p.filter((x) => x.url.trim()), ...urls.map((url) => ({ url, alt: '' }))])
+                  }
+                />
+                <button type="button" onClick={() => setImages((p) => [...p, { url: '', alt: '' }])} className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-primary-600 hover:bg-primary-50">
+                  <PlusIcon className="h-3 w-3" /> Add link
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               {images.map((img, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <input value={img.url} onChange={(e) => setImages((p) => p.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="Image URL (https://...)" className="input-field flex-1" />
+                  {img.url.trim() ? (
+                    <img src={img.url} alt="" className="h-10 w-10 flex-shrink-0 rounded border border-gray-200 object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 flex-shrink-0 rounded border border-dashed border-gray-300" />
+                  )}
+                  <input value={img.url} onChange={(e) => setImages((p) => p.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} placeholder="Picture address (or use Upload)" className="input-field flex-1" />
                   <input value={img.alt} onChange={(e) => setImages((p) => p.map((x, j) => (j === i ? { ...x, alt: e.target.value } : x)))} placeholder="Alt text" className="input-field w-40" />
                   <button type="button" onClick={() => setImages((p) => (p.length > 1 ? p.filter((_, j) => j !== i) : [{ url: '', alt: '' }]))} className="rounded p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50">
                     <XMarkIcon className="h-4 w-4" />
@@ -757,15 +770,28 @@ export default function ProductFormPage() {
               {/* Images */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="label-field mb-0">Images</label>
-                  <button
-                    type="button"
-                    onClick={() => addVariantImage(vIdx)}
-                    className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-primary-600 hover:bg-primary-50 transition-colors"
-                  >
-                    <PlusIcon className="h-3 w-3" />
-                    Add Image
-                  </button>
+                  <label className="label-field mb-0">Pictures of this option (optional)</label>
+                  <div className="flex items-start gap-1">
+                    <ImageUploadButton
+                      onUploaded={(urls) =>
+                        setVariants((prev) =>
+                          prev.map((v, i) =>
+                            i === vIdx
+                              ? { ...v, images: [...v.images.filter((x) => x.url.trim()), ...urls.map((url) => ({ url, alt: '' }))] }
+                              : v,
+                          ),
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => addVariantImage(vIdx)}
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-primary-600 hover:bg-primary-50 transition-colors"
+                    >
+                      <PlusIcon className="h-3 w-3" />
+                      Add link
+                    </button>
+                  </div>
                 </div>
                 {variant.images.length === 0 ? (
                   <p className="text-xs text-gray-400 py-1">No images</p>

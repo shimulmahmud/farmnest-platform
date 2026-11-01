@@ -26,6 +26,11 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH:-amd64} go build \
     -ldflags="-w -s" \
     -o /bin/worker ./cmd/worker
 
+# One-off tool: creates the first admin on a real server (see PRODUCTION.md)
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH:-amd64} go build \
+    -ldflags="-w -s" \
+    -o /bin/createadmin ./cmd/createadmin
+
 # ============================================================
 # Stage 2: Runtime (API)
 # ============================================================
@@ -34,10 +39,17 @@ FROM alpine:3.19 AS api
 RUN apk add --no-cache ca-certificates tzdata wget
 
 COPY --from=builder /bin/api /bin/api
+COPY --from=builder /bin/createadmin /bin/createadmin
 
 EXPOSE 8080
 
 RUN adduser -D -u 10001 appuser
+
+# Product pictures uploaded from the admin panel are kept here (a volume, so they survive restarts)
+ENV UPLOAD_DIR=/data/uploads
+RUN mkdir -p /data/uploads && chown appuser /data/uploads
+VOLUME /data/uploads
+
 USER appuser
 
 ENTRYPOINT ["/bin/api"]

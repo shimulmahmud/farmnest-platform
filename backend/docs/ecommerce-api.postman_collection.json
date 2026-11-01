@@ -766,6 +766,44 @@
             "description": "Admin: delete a product."
           },
           "response": []
+        },
+        {
+          "name": "Admin: upload a picture",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/uploads/images",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "uploads",
+                "images"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "description": "Admin token. Choose a JPG, PNG, WebP or GIF (max 8 MB) in the 'file' field. Returns {url} such as /uploads/3f2a....jpg: put that address in a product's images[].url. The file is checked for real, so a renamed file is rejected."
+          },
+          "response": []
         }
       ]
     },
